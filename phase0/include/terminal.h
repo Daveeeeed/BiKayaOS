@@ -32,5 +32,6 @@ unsigned int getRecvdStat(termreg_t *tp);
 /* TRANSM_COMMAND */
 unsigned int getTransCChar(termreg_t *tp);
 unsigned int getTransmCmd(termreg_t *tp);
+void setTransCmd(termreg_t *tp, char c);
 
 #endif

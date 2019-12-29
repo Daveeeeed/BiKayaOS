@@ -35,4 +35,8 @@ unsigned int getTransmCmd(termreg_t *tp){
 return tp->transm_command & TERM_STATUS_MASK;
 }
 
+void setTransCmd(termreg_t *tp, char c){
+tp->transm_command = ((c << CHAR_OFFSET) | CMD_TRANS_RECV);
+}
+
 
