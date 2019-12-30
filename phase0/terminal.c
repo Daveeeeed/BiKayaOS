@@ -1,10 +1,11 @@
 #include "terminal.h"
+#include <stddef.h>
 
 termreg_t* getTerm(int x){
 	if (x >= 0 && x <= 7) {
 		return (termreg_t *)DEV_REG_ADDR(IL_TERMINAL, x);
 	} else {
-		return nullptr;
+		return NULL;
 	}
 }
 
