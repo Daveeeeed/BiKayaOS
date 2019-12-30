@@ -1,6 +1,6 @@
 #include "stringprint.h"
 
-static char charPressed(termreg_t *term){
+char charPressed(termreg_t *term){
 
 	unsigned int stat = getRecvdStat(term);
 
@@ -15,7 +15,7 @@ static char charPressed(termreg_t *term){
 	return received;
 }
 
-static int termPutChar(char c, int x){
+int termPutChar(char c, int x){
 	
 	termreg_t *term = getTerm(x);
 
@@ -36,7 +36,7 @@ static int termPutChar(char c, int x){
 	}
 }
 
-static int printPutChar(char c, int x){
+int printPutChar(char c, int x){
 	
 	dtpreg_t *printer = (dtpreg_t *)DEV_REG_ADDR(IL_PRINTER, x);
 
