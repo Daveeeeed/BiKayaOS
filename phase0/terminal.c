@@ -4,7 +4,7 @@ termreg_t* getTerm(int x){
 	if (x >= 0 && x <= 7) {
 		return (termreg_t *)DEV_REG_ADDR(IL_TERMINAL, x);
 	} else {
-		return NULL;
+		return nullptr;
 	}
 }
 
