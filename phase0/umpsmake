@@ -27,7 +27,7 @@ all : kernel.core.umps
 kernel.core.umps : kernel
 	umps2-elf2umps -k $<
 
-kernel : hello.o termprint.o crtso.o libumps.o
+kernel : main.o terminal.o stringprint.o crtso.o libumps.o
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 clean :

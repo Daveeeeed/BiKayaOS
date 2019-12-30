@@ -29,10 +29,11 @@ static int termPutChar(char c, int x){
 
 	term->transm_command = CMD_ACK;
 
-    	if (stat != ST_TRANS_RECV)
+    if (stat != ST_TRANS_RECV) {
 		return -1;
-    	else
+	} else {
 		return 0;
+	}
 }
 
 static int printPutChar(char c, int x){
@@ -50,15 +51,13 @@ static int printPutChar(char c, int x){
 
 	printer->command = CMD_ACK;
 
-    	if (printer->status != ST_ERROR)
+	if (printer->status != ST_ERROR) {
 		return 0;
-    	else
+	} else {
 		return -1;
+	}
 }
 
-
-
-/* Salva l'input del terminal x sulla stringa str */
 int saveString(char *str, int max_len, int x){
 
 	termreg_t *term = getTerm(x);
@@ -66,7 +65,7 @@ int saveString(char *str, int max_len, int x){
 	int i = 0;
 	char input;
 
-	while (i < max_len && (input = charPressed(term)) != '\n'){
+	while (i < max_len && (input = charPressed(term)) != '\n') {
 		str[i] = input;
 		i++;
 	}
@@ -74,17 +73,17 @@ int saveString(char *str, int max_len, int x){
 }
 
 void termPrint(char *str, int x) {
-	while (*str)
-		if (termPutChar(*str++, x))
+	while (*str){
+		if (termPutChar(*str++, x)) {
 			return;
+		}
+	}
 }
 
 void printPrint(char *str, int x) {
-	while (*str)
-		if (printPutChar(*str++, x))
+	while (*str){
+		if (printPutChar(*str++, x)) {
 			return;
+		}
+	}
 }
-
-
-
-

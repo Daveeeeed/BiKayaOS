@@ -18,7 +18,7 @@
 #define TERM_STATUS_MASK   0xFF
 
 
-/* GET THE ADDRESS OF DESIRED TERMINAL */
+/* Ritorna l'indirizzo di memoria del terminale numero x */
 termreg_t* getTerm(int x);
 
 /* TRANSM_STATUS */
