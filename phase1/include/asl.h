@@ -4,6 +4,7 @@
 #include <types_bikaya.h>
 
 /* ASL handling functions */
+
 semd_t* getSemd(int *key);
 void initASL();
 

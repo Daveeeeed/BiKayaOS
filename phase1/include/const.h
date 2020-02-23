@@ -13,12 +13,13 @@
 #define UPROCMAX 3  /* number of usermode processes (not including master proc
 		       and system daemons */
 
-#define	HIDDEN static
+#define	HIDDEN	static
 #define	TRUE 	1
 #define	FALSE	0
-#define ON 	1
+#define ERROR	-1
+#define ON		1
 #define OFF 	0
-#define EOS '\0'
+#define EOS		'\0'
 
 #define DEV_PER_INT 8 /* Maximum number of devices per interrupt line */
 

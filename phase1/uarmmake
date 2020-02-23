@@ -6,14 +6,12 @@ LD = $(XT_PRG_PREFIX)ld
 
 # uARM-related paths
 UARM_DIR = ./uarm
-INCLUDE_DIR = ./bikaya
-INCLUDE_PCB = ./bikaya/pcb
-INCLUDE_ASL = ./bikaya/asl
+INCLUDE_DIR = ./include
 
 # Compiler options
 CFLAGS_LANG = 
 CFLAGS_UARM = -mcpu=arm7tdmi -DTARGET_UARM=1
-CFLAGS = $(CFLAGS_LANG) $(CFLAGS_UARM) -I$(UARM_DIR) -I$(UARM_DIR)/uarm -I$(INCLUDE_DIR) -I$(INCLUDE_PCB) -I$(INCLUDE_ASL) -Wall -O0
+CFLAGS = $(CFLAGS_LANG) $(CFLAGS_UARM) -I$(UARM_DIR) -I$(UARM_DIR)/uarm -I$(INCLUDE_DIR) -Wall -O0
 
 # Linker options
 LDFLAGS = -G 0 -nostdlib -T $(UARM_DIR)/elf32ltsarm.h.uarmcore.x
@@ -25,11 +23,11 @@ VPATH = $(UARM_DIR)
 
 all : kernel
 
-kernel : p1test_bikaya_v0.o bikaya/asl/asl.o bikaya/pcb/pcb.o crtso.o libuarm.o
+kernel : p1test_bikaya_v0.o asl.o pcb.o crtso.o libuarm.o termprint.o
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 clean:
-	-rm -f bikaya/*.o bikaya/pcb/*.o bikaya/asl/*.o kernel kernel.*.uarm
+	-rm -f include/*.o kernel kernel.*.uarm *.o
 
 # Pattern rule for assembly modules
 %.o : %.s

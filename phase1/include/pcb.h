@@ -1,6 +1,7 @@
 #ifndef PCB_H
 #define PCB_H
 #include <types_bikaya.h>
+#include "termprint.h"
 
 /* PCB handling functions */
 

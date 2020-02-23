@@ -4,7 +4,7 @@ default:
 
 umps:
 	$(MAKE) -f umpsmake
-	
+	@echo "DONE"
 umps2:
 	$(MAKE) -f umpsmake
 
