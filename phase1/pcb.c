@@ -4,9 +4,11 @@
 
 #define HIDDEN static
 
-HIDDEN LIST_HEAD(pcb_free);
-
+// Array di PCB disponibili
 HIDDEN pcb_t pcb_table[MAXPROC];
+
+// Lista dei PCB liberi o inutilizzati
+HIDDEN LIST_HEAD(pcb_free);
 
 void initPcbs(void){
    for (int i = 0; i < MAXPROC; i++){
@@ -15,21 +17,20 @@ void initPcbs(void){
 }
 
 void freePcb(pcb_t *p){
-   list_add_tail(&p->p_next, &pcb_free); 
+    if (p != NULL){
+        list_add_tail(&p->p_next, &pcb_free);
+    }
 }
 
 pcb_t *allocPcb(void){
-    if(list_empty(&pcb_free)){
-        return NULL;
-    } else {
-        struct pcb_t *deleted;
-        deleted = container_of(pcb_free.next, pcb_t, p_next);
-        list_del(pcb_free.next);
-        deleted->p_parent = NULL;
-        deleted->p_semkey = NULL;
-        deleted->priority = 0;
-        return deleted;
-    }
+    if(list_empty(&pcb_free)) return NULL;
+    pcb_t *deleted;
+    deleted = container_of(pcb_free.next, pcb_t, p_next);
+    list_del(pcb_free.next);
+    deleted->p_parent = NULL;
+    deleted->p_semkey = NULL;
+    deleted->priority = 0;
+    return deleted;
 }
 
 void mkEmptyProcQ(struct list_head *head){
@@ -40,71 +41,54 @@ int emptyProcQ(struct list_head *head){
     return (list_empty(head));
 }
 
-void insertProcQ(struct list_head *q, struct pcb_t *p){ 
-    if ( q == NULL || p == NULL)
-        return;
-
-    struct list_head *aux, *old;
-    struct pcb_t *tmp;
-
+void insertProcQ(struct list_head *q, pcb_t *p){ 
+    if (q == NULL || p == NULL) return;
+    struct list_head* iterator, *old;
+    pcb_t *target;
     old = q;
-    aux = q->next;
-
-    while (aux != q && aux != NULL) {
-        tmp = container_of(aux, struct pcb_t, p_next);
-        if (tmp->priority < p->priority)
-            break;
-
-        old = aux;
-        aux = aux->next;
+    iterator = q->next;
+    while (iterator != q) {
+        target = container_of(iterator, pcb_t, p_next);
+        if (target->priority < p->priority) break;
+        old = iterator;
+        iterator = iterator->next;
     }
-        
-    if (aux == q)
-        list_add_tail( &(p->p_next) , q );
-    else
-        list_add( &(p->p_next) , old );
-
+    if (iterator == q) list_add_tail(&(p->p_next), q);
+    else list_add(&(p->p_next), old);
 }
 
 pcb_t *headProcQ(struct list_head *head){
-    struct pcb_t *test1;
-    test1 = container_of(head->next, struct pcb_t, p_next);
-    /*if(test1->priority == NULL){
-        return NULL
-    }                                   // potrebbe essere un bel metodo ma non ho la certezza che non crei problemi alla memoria 
-                                        // discuterne con davide
-    else{
-        return test1;
-    }*/
+    pcb_t *target;
+    target = container_of(head->next, pcb_t, p_next);
     if(emptyProcQ(head)) return NULL;
-    else return test1;
+    return target;
 }
 
 pcb_t *removeProcQ(struct list_head *head){
-    pcb_t *ret; 
-    ret = headProcQ(head);
+    pcb_t *target; 
+    target = headProcQ(head);
     list_del(head->next);
-    return ret;
+    return target;
 }
 
 pcb_t *outProcQ(struct list_head *head, pcb_t *p){
     if(emptyProcQ(head)){
         return FALSE;
     } else {
-        if(p==NULL){
+        if(p == NULL){
             return NULL;
         } else {
-            struct pcb_t *test1;
-            struct list_head *test2;
-            test2 = head->next; 
-            test1 = container_of(test2,struct pcb_t, p_next);
-            while(test1 != p && test2 != head){
-                test2 = test2->next ;
-                test1 = container_of(test2,struct pcb_t, p_next);
+            pcb_t *target;
+            struct list_head *tmp;
+            tmp = head->next; 
+            target = container_of(tmp, pcb_t, p_next);
+            while(target != p && tmp != head){
+                tmp = tmp->next ;
+                target = container_of(tmp, pcb_t, p_next);
             }
-            if(test1 == p){
-                list_del(&(test1->p_next));
-                return test1;
+            if(target == p){
+                list_del(&(target->p_next));
+                return target;
             } else {
                 return NULL;
             }
