@@ -7,7 +7,7 @@ CPLv2 */
 #define NULL ((void *) 0)
 #endif
 typedef unsigned int    size_tt;
-#include "termprint.h"
+
 /*
     Macro che restituisce il puntatore all'istanza della struttura che contiene
     un certo list_head. Per farlo usa il puntatore al list_head, il tipo

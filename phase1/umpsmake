@@ -1,14 +1,12 @@
 # Cross toolchain variables
 # If these are not in your path, you can make them absolute.
-XT_PRG_PREFIX = mipsel-linux-gnu-
+XT_PRG_PREFIX = mipsisa64r6el-linux-gnuabi64-
 CC = $(XT_PRG_PREFIX)gcc
 LD = $(XT_PRG_PREFIX)ld
 
 # uMPS2-related paths
 UMPS2_DIR = ./umps
-INCLUDE_DIR = ./bikaya
-INCLUDE_PCB = ./bikaya/pcb
-INCLUDE_ASL = ./bikaya/asl
+INCLUDE_DIR = ./include
 
 # Compiler options
 CFLAGS_LANG = -ffreestanding -DTARGET_UMPS=1
@@ -28,11 +26,11 @@ all : kernel.core.umps
 kernel.core.umps : kernel
 	umps2-elf2umps -k $<
 
-kernel : p1test_bikaya_v0.o bikaya/asl/asl.o bikaya/pcb/pcb.o crtso.o libumps.o
+kernel : p1test_bikaya_v0.o asl.o pcb.o crtso.o libumps.o
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 clean :
-	-rm -f bikaya/*.o bikaya/pcb/*.o bikaya/asl/*.o kernel kernel.*.umps
+	-rm -f include/*.o kernel kernel.*.umps *.o
 
 # Pattern rule for assembly modules
 %.o : %.S

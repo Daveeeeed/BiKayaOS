@@ -1,6 +1,5 @@
 #include "asl.h"
 #include "const.h"
-#include "termprint.h"
 #include "pcb.h"
 
 
