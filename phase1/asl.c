@@ -1,6 +1,7 @@
 #include "asl.h"
 #include "const.h"
 #include "termprint.h"
+#include "pcb.h"
 
 
 #define HIDDEN static
@@ -19,14 +20,10 @@ HIDDEN semd_t* semdOf(struct list_head *target){
     return container_of(target, semd_t, s_next);
 }
 
-// Ritorna la chiave associata al SEMD contenente target
 HIDDEN int* keyOf(struct list_head *target){
     return semdOf(target)->s_key;
 }
 
-// Restituisce il puntatore al SEMD nella semd_busy la cui
-// chiave è pari a key. Se non esiste un elemento nella
-// semd_busy con chiave uguale a key, viene restituito NULL.
 semd_t* getSemd(int *key){
     struct list_head *tmp = semd_busy.next;
     semd_t *target;
@@ -38,25 +35,16 @@ semd_t* getSemd(int *key){
     return NULL;
 }
 
-// Inizializza la lista di semafori liberi
 void initASL(){
     for (int i = 0; i < MAXPROC; i++){
         semd_table[i].s_key = NULL;
         semd_table[i].s_next.next = NULL;
         semd_table[i].s_next.prev = NULL;
-        INIT_LIST_HEAD( &semd_table[i].s_procQ ); //inizializza la sentinella della lista di PCB di SEMD_T
+        INIT_LIST_HEAD( &semd_table[i].s_procQ );
         list_add_tail(&semd_table[i].s_next, &semd_free);
     }
 }
 
-// Viene inserito il PCB puntato da p nella coda dei processi bloccati
-// associata al SEMD con chiave key.
-// Se il semaforo corrispondente non è presente nella semd_busy, alloca
-// un nuovo SEMD dalla lista di quelli liberi (semd_free) e lo inserisce
-// nella semd_busy, settando i campi in maniera opportuna.
-// Se non è possibile allocare un nuovo SEMD perché la lista di quelli
-// liberi è vuota, restituisce TRUE.
-// In tutti gli altri casi, restituisce FALSE.
 int insertBlocked(int *key, struct pcb_t *p){
     if(p == NULL || key == NULL) return ERROR;
     struct list_head *tmp_free, *tmp_busy; 
@@ -77,60 +65,84 @@ int insertBlocked(int *key, struct pcb_t *p){
     return FALSE;
 }
 
-//rimuove il semaforo q dalla lista di quelli attivi se non ha processi bloccati
-HIDDEN inline void rem_idle_sem( struct semd_t* q){
-	if( list_empty( &(q->s_procQ) )){
-		list_del( &(q->s_next) );
-		list_add( &(q->s_next), &semd_free );
-	}
-}
-
-//Rimuove il primo processo dalla lista dei processi bloccati del semaforo puntato da semAdd  
-struct pcb_t *removeBlocked(int *key){
+pcb_t* removeBlocked(int *key){
+    struct pcb_t* pcb_target;
     struct semd_t* semd_target;
-    struct pcb_t* pcb_target ;
     semd_target = getSemd(key);
-    if( semd_target != NULL ){
+    if (semd_target != NULL){
         pcb_target = removeProcQ(&(semd_target->s_procQ));
-        rem_idle_sem(semd_target);
-	return pcb_target ;	
+        if(list_empty(&(semd_target->s_procQ))){
+                list_del(&semd_target->s_next);
+                list_add_tail(&(semd_target->s_next), &semd_free);
+            }
+        return pcb_target;
     }
     return NULL;
 }
 
-//Rimuove il processo p dalla lista di processi bloccati del semaforo su cui è bloccato
-//(se bloccato su un semaforo)
-struct pcb_t *outBlocked(struct pcb_t *p){
-    if( p == NULL ) return NULL;
-    struct semd_t *sem ;
-    if( p->p_semkey == NULL ) return NULL;
-    sem = getSemd( p->p_semkey );
-    if( sem == NULL ) return NULL ;
-    p = outProcQ(  &(sem->s_procQ) , p ); 
-    if(p!= NULL) rem_idle_sem( getSemd(p->p_semkey) );
-    return p;
-}
 
-void outChildBlocked(struct pcb_t *p) {
-    struct list_head *aux;
-
-    if (p == NULL)
-        return;
-
-    aux = p->p_child.next;
-    while (aux != &(p->p_child) && aux != NULL) {
-        outChildBlocked(container_of(aux, struct pcb_t, p_sib));
-        outBlocked(container_of(aux, struct pcb_t, p_sib));
-        aux = aux->next;
+/* DESCRIZIONE: Rimuove il PCB puntato da p dalla coda del
+semaforo su cui è bloccato (indicato da p->p_semKey). Se il
+PCB non compare in tale coda, allora restituisce NULL
+(condizione di errore). Altrimenti, restituisce p. Se la coda
+dei processi bloccati per il semaforo diventa vuota,
+rimuove il descrittore corrispondente dalla semd_busy e lo
+inserisce nella coda dei descrittori liberi (semdFree). */
+pcb_t* outBlocked(pcb_t *p){
+    if (p != NULL){
+        struct semd_t* semd_target;
+        semd_target = getSemd(p->p_semkey);
+        if(semd_target != NULL){
+            outProcQ(&semd_target->s_procQ, p);
+            if(list_empty(&(semd_target->s_procQ))){
+                list_del(&semd_target->s_next);
+                list_add_tail(&(semd_target->s_next), &semd_free);
+            }
+            return p;
+        }
+        return NULL;
     }
-    outBlocked(p);
+    return NULL;
 }
- 
 
-//Restituisce il primo processo bloccato sul semaforo puntato da semAdd senza rimuoverlo
-struct pcb_t *headBlocked(int *semAdd){
-    struct semd_t* q;
-    q = getSemd( semAdd );
-    if( q == NULL ) return NULL;
-    return headProcQ( &q->s_procQ );
+
+/* DESCRIZIONE: Restituisce (senza rimuovere) il puntatore al
+PCB che si trova in testa alla coda dei processi associata al
+SEMD con chiave key. Ritorna NULL se il SEMD non
+compare nella ASL oppure se compare ma la sua coda dei
+processi è vuota */
+pcb_t* headBlocked(int *key){
+    struct semd_t* tmps;
+    tmps = getSemd(key);
+    if(tmps == NULL || list_empty(&(tmps->s_procQ))){
+        return NULL;
+    } else {
+        return headProcQ(&(tmps->s_procQ));
+    }
+}
+
+/* DESCRIZIONE: Rimuove il PCB
+puntato da p dalla coda del semaforo
+su cui è bloccato (indicato da
+p->p_semKey). Inoltre, elimina tutti i
+processi dell’albero radicato in p (ossia
+tutti i processi che hanno come avo p)
+dalle eventuali code dei semafori su
+cui sono bloccati. */
+void outChildBlocked(pcb_t *p){
+    if (p != NULL){
+        if (emptyChild(p)){
+            outBlocked(p);
+            return;
+        }
+        struct list_head* tmp, *tmp2;
+        tmp = p->p_child.next;
+        tmp2 = &p->p_child;
+        while (tmp != tmp2){
+            outChildBlocked(container_of(tmp, struct pcb_t, p_sib));
+            outBlocked(container_of(tmp, struct pcb_t, p_sib));
+            tmp = tmp->next;
+        }
+        outBlocked(p);
+    }
 }
