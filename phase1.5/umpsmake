@@ -1,0 +1,50 @@
+# Cross toolchain variables
+# If these are not in your path, you can make them absolute.
+CC = mipsisa64r6el-linux-gnuabi64-gcc
+LD = mipsel-linux-gnu-ld
+
+# Paths
+INCLUDE_DIR = ./scr ./src/umps ./include ./include/umps
+OUTPUT_DIR = ./build
+VPATH = $(INCLUDE_DIR)
+
+# Files
+SRCS := $(wildcard src/*.c) crtso.S libumps.S
+OBJS_TMP := $(SRCS:.S=.o)
+OBJS := $(OBJS_TMP:.c=.o)
+
+# Compiler options
+CFLAGS_LANG = -ffreestanding -DTARGET_UMPS=1
+CFLAGS_MIPS = -mips1 -mabi=32 -mno-gpopt -G 0 -mno-abicalls -fno-pic -mfp32
+CFLAGS = $(CFLAGS_LANG) $(CFLAGS_MIPS) $(addprefix -I ,$(INCLUDE_DIR)) -Wall -O0
+
+# Linker options
+LDFLAGS = -G 0 -nostdlib -T src/umps/umpscore.ldscript
+
+# Commands
+.PHONY : all clean
+
+all : kernel.core.umps
+
+kernel.core.umps : kernel
+	umps2-elf2umps -k $(OUTPUT_DIR)/$<
+
+kernel : $(OBJS)
+	$(LD) -o $(OUTPUT_DIR)/$@ $(addprefix $(OUTPUT_DIR)/,$(subst src/,,$^)) $(LDFLAGS)
+
+clean :
+	-rm -f $(OUTPUT_DIR)/*
+
+# Generic pattern
+define COMPILE_PATTERN
+	$(CC) $(CFLAGS) -c -o $@ $<
+	mv $@ $(OUTPUT_DIR)/
+endef
+
+# Rule for C modules
+%.o : %.c
+	$(COMPILE_PATTERN)
+
+# Rule for assembly modules
+%.o : %.S
+	$(COMPILE_PATTERN)
