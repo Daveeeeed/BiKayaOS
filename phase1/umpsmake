@@ -1,37 +1,50 @@
 # Cross toolchain variables
 # If these are not in your path, you can make them absolute.
-XT_PRG_PREFIX = mipsisa64r6el-linux-gnuabi64-
-CC = $(XT_PRG_PREFIX)gcc
-LD = $(XT_PRG_PREFIX)ld
+CC = mipsisa64r6el-linux-gnuabi64-gcc
+LD = mipsel-linux-gnu-ld
 
-# uMPS2-related paths
-UMPS2_DIR = ./umps
-INCLUDE_DIR = ./include
+# Paths
+INCLUDE_DIR = ./scr ./src/umps ./include ./include/umps
+OUTPUT_DIR = ./build
+VPATH = $(INCLUDE_DIR)
+
+# Files
+SRCS := $(wildcard src/*.c) crtso.S libumps.S
+OBJS_TMP := $(SRCS:.S=.o)
+OBJS := $(OBJS_TMP:.c=.o)
 
 # Compiler options
 CFLAGS_LANG = -ffreestanding -DTARGET_UMPS=1
 CFLAGS_MIPS = -mips1 -mabi=32 -mno-gpopt -G 0 -mno-abicalls -fno-pic -mfp32
-CFLAGS = $(CFLAGS_LANG) $(CFLAGS_MIPS) -I$(UMPS2_DIR) -I$(INCLUDE_DIR) -I$(INCLUDE_ASL) -I$(INCLUDE_PCB) -Wall -O0
+CFLAGS = $(CFLAGS_LANG) $(CFLAGS_MIPS) $(addprefix -I ,$(INCLUDE_DIR)) -Wall -O0
 
 # Linker options
-LDFLAGS = -G 0 -nostdlib -T $(UMPS2_DIR)/umpscore.ldscript
+LDFLAGS = -G 0 -nostdlib -T src/umps/umpscore.ldscript
 
-# Add the location of crt*.S to the search path
-VPATH = $(UMPS2_DIR)
-
+# Commands
 .PHONY : all clean
 
 all : kernel.core.umps
 
 kernel.core.umps : kernel
-	umps2-elf2umps -k $<
+	umps2-elf2umps -k $(OUTPUT_DIR)/$<
 
-kernel : p1test_bikaya_v0.o asl.o pcb.o crtso.o libumps.o
-	$(LD) -o $@ $^ $(LDFLAGS)
+kernel : $(OBJS)
+	$(LD) -o $(OUTPUT_DIR)/$@ $(addprefix $(OUTPUT_DIR)/,$(subst src/,,$^)) $(LDFLAGS)
 
 clean :
-	-rm -f include/*.o kernel kernel.*.umps *.o
+	-rm -f $(OUTPUT_DIR)/*
 
-# Pattern rule for assembly modules
-%.o : %.S
+# Generic pattern
+define COMPILE_PATTERN
 	$(CC) $(CFLAGS) -c -o $@ $<
+	mv $@ $(OUTPUT_DIR)/
+endef
+
+# Rule for C modules
+%.o : %.c
+	$(COMPILE_PATTERN)
+
+# Rule for assembly modules
+%.o : %.S
+	$(COMPILE_PATTERN)

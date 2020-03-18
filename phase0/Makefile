@@ -3,16 +3,17 @@ default:
 	@echo "Please specify a target"
 
 umps:
-	$(MAKE) -f umpsmake
-	
-umps2:
-	$(MAKE) -f umpsmake
+	@mkdir -p build
+	@$(MAKE) -f uarmmake clean
+	@$(MAKE) -f umpsmake
 
 uarm:
-	$(MAKE) -f uarmmake
+	@mkdir -p build
+	@$(MAKE) -f umpsmake clean
+	@$(MAKE) -f uarmmake
 
 clean:
-	$(MAKE) -f uarmmake clean
-	$(MAKE) -f umpsmake clean
+	@rm -f build/*
+	@rmdir build
 
-.PHONY: umps umps2 uarm clean default
+.PHONY: default umps uarm clean
