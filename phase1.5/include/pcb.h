@@ -14,7 +14,7 @@ void freePcb(pcb_t *p);
 // un puntatore ad esso, NULL altrimenti
 pcb_t *allocPcb(void);
 
-// Inizializzata la lista dei PCB, inizializzandone
+// Inizializza la lista dei PCB, inizializzandone
 // la sentinella head passata come parametro
 void mkEmptyProcQ(struct list_head *head);
 

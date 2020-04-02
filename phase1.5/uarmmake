@@ -10,7 +10,7 @@ OUTPUT_DIR = ./build
 VPATH = $(INCLUDE_DIR)
 
 # Files
-SRCS := $(wildcard src/*.c) crtso.s libuarm.s
+SRCS := $(wildcard src/*.c) crtso.s libuarm.s libdiv.s
 OBJS_TMP := $(SRCS:.s=.o)
 OBJS := $(OBJS_TMP:.c=.o)
 
