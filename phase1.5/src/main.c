@@ -1,68 +1,55 @@
-#ifdef TARGET_UMPS
-#include "umps/libumps.h"
-#include "umps/arch.h"
-#endif
+#include "main.h"
+#include "scheduler.h"
+#include "interrupt.h"
+#include "syscall.h"
 
-#ifdef TARGET_UARM
-#include "uarm/libuarm.h"
-#include "uarm/arch.h"
-#endif
-
-#include "const.h"
-#include "listx.h"
-#include "pcb.h"
-
-#define FIRST_PRIORITY 1
-#define SECOND_PRIORITY 2
-#define THIRD_PRIORITY 3
-
-// Lista processi ready
 LIST_HEAD(ready_queue);
 
-// Process control block associati ai 3 processi test
-pcb_t *first_t,*second_t,*third_t;
-
-// Funzioni esterne di test collocate in p1.5test_bikaya_v0.c
-extern void test1(void);
-extern void test2(void);
-extern void test3(void);
-
-extern void scheduler(struct list_head* queue);
-
-// Funzione di debug
 void breakpoint(){
     return;
 }
 
-// Funzioni di gestione
-extern void scheduler();
-
-// Handler inutili
-void sys_handler(){
-    tprint("Risen sys_handler\n");
-    breakpoint();
-    return;
-}
-
 void trap_handler(){
-    tprint("Risen trap_handler\n");
-    breakpoint();
+    tprint("Risen trap handler, it's not handled so...");
+    HALT();
     return;
 }
 
 void tlb_handler(){
-    tprint("Risen tlb_handler\n");
-    breakpoint();
+    tprint("Risen TLB handler, it's not handled so...");
+    HALT();
     return;
 }
 
-void int_handler(){
-    tprint("Risen int_handler\n");
-    breakpoint();
-    return;
+struct list_head* get_queue(){
+    return &ready_queue;
 }
 
-// Inizializza una new area con l'handler ad essa associato
+void update_state(state_t *old, state_t *new){	
+	new->a1 = old->a1;
+	new->a2 = old->a2;
+	new->a3 = old->a3;
+	new->a4 = old->a4;
+	new->v1 = old->v1;
+	new->v2 = old->v2;
+	new->v3 = old->v3;
+	new->v4 = old->v4;
+	new->v5 = old->v5;
+	new->v6 = old->v6;
+	new->sl = old->sl;
+	new->fp = old->fp;
+	new->ip = old->ip;
+	new->sp = old->sp;
+	new->lr = old->lr;
+	new->pc = old->pc;
+	new->cpsr = old->cpsr;
+	new->CP15_Control = old->CP15_Control;
+	new->CP15_EntryHi = old->CP15_EntryHi;
+	new->CP15_Cause = old->CP15_Cause;
+	new->TOD_Hi = old->TOD_Hi;
+	new->TOD_Low = old->TOD_Low;
+}
+
 void init_area(memaddr new_area, memaddr handler){
     state_t* new_state = (state_t*) new_area;
     STST(new_state);
@@ -73,13 +60,10 @@ void init_area(memaddr new_area, memaddr handler){
     // VM disabilitata
     new_state->CP15_Control = CP15_DISABLE_VM(new_state->CP15_Control);
     // Kernel mode ON, timer e interrupt mascherati
-    // new_state->cpsr = new_state->cpsr | (STATUS_TIMER_ID) | (STATUS_ID));
-    new_state->cpsr = new_state->cpsr | 0x000000DF;
+    new_state->cpsr = STATUS_ALL_INT_DISABLE(new_state->cpsr) | STATUS_SYS_MODE;
 }
 
 void create_process(memaddr entry_point, pcb_t* process_block, unsigned priority){
-    // Imposta stato process block
-    //STST(&process_block->p_s);
     // Abilito interrupt, timer e kernel mode
     process_block->p_s.cpsr = STATUS_ALL_INT_ENABLE(process_block->p_s.cpsr) | STATUS_SYS_MODE;
     // VM disabilitata
@@ -102,16 +86,23 @@ int main(){
     init_area((memaddr) PGMTRAP_NEWAREA, (memaddr) trap_handler);
     init_area((memaddr) TLB_NEWAREA, (memaddr) tlb_handler);
     init_area((memaddr) INT_NEWAREA, (memaddr) int_handler);
-    breakpoint();
-    // Inizializza la lista dei pcb
+
+    // Inizializza la pcb free
     initPcbs();
 
-    // Istanzio i 3 processi di test
+    // Alloca 3 pcb
+    first_t = allocPcb();
+    second_t = allocPcb();
+    third_t = allocPcb();
+
+    // Istanzia i 3 processi di test nei pcb
     create_process((memaddr) test1, first_t, FIRST_PRIORITY);
     create_process((memaddr) test2, second_t, SECOND_PRIORITY);
     create_process((memaddr) test3, third_t, THIRD_PRIORITY);
 
-    // Gestione 
-    scheduler(&ready_queue);
+    current_process = NULL;
+
+    // Gestione
+    scheduler();
     return 0;
 }
