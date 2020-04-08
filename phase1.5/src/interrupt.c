@@ -1,6 +1,14 @@
 #include "interrupt.h"
-#include "main.h"
+#include "utils.h"
 #include "scheduler.h"
+
+#ifdef TARGET_UMPS
+
+#endif
+
+#ifdef TARGET_UARM
+
+#endif
 
 void disk_handler(){
     tprint("Disk interrupt handler\n");
@@ -19,6 +27,7 @@ void printer_handler(){
 }
 
 void terminal_handler(){
+    /*
     memaddr* interrupt_bitmap = (memaddr*) CDEV_BITMAP_ADDR(INT_TERMINAL);
     int device_nr = get_device_nr(*interrupt_bitmap);
     if (device_nr < 0) PANIC();
@@ -29,18 +38,22 @@ void terminal_handler(){
     if ((term->transm_status & TERM_STATUS_MASK) == DEV_TTRS_S_CHARTRSM){
         term->transm_command = DEV_C_ACK;
     }
+    */
 }
 
 int get_device_nr(unsigned bitmap){
+    /*
     int i;
     for (i = 0; i < 8; i++){
         if (bitmap == 1) return i;
         else bitmap = bitmap >> 1;
     }
     return -1;
+    */
 }
 
 void int_handler(){
+    /*
     state_t* old_state = (state_t*) INT_OLDAREA;
     old_state->pc = old_state->pc - 4;
     update_state(old_state, &current_process->p_s);
@@ -62,4 +75,5 @@ void int_handler(){
         PANIC();
     }
     scheduler();
+    */
 }

@@ -1,5 +1,5 @@
-#ifndef PCB_H
-#define PCB_H
+#ifndef _PCB_H
+#define _PCB_H
 #include <types_bikaya.h>
 
 // Inizializza pcb_free in modo da contenere tutti

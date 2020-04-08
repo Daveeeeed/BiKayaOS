@@ -1,7 +1,16 @@
 #include "scheduler.h"
-#include "main.h"
+#include "utils.h"
+
+#ifdef TARGET_UMPS
+
+#endif
+
+#ifdef TARGET_UARM
+
+#endif
 
 void scheduler(){
+    /*
     if (current_process == NULL && !emptyProcQ(get_queue())){
         current_process = removeProcQ(get_queue());
         timer_on = 1;
@@ -24,4 +33,5 @@ void scheduler(){
         setTIMER(TIME_SLICE);
     }
     LDST(&current_process->p_s);
+    */
 }

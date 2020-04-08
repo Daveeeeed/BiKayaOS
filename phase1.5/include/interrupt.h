@@ -1,5 +1,13 @@
-#ifndef INTERRUPT_H
-#define INTERRUPT_H
+#ifndef _INTERRUPT_H
+#define _INTERRUPT_H
+
+#ifdef TARGET_UMPS
+
+#endif
+
+#ifdef TARGET_UARM
+
+#endif
 
 #define ST_NOT_INSTALLED   0
 #define ST_READY           1
@@ -31,3 +39,4 @@ int get_device_nr(unsigned bitmap);
 void int_handler();
 
 #endif
+
