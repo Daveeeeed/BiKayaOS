@@ -30,6 +30,7 @@
 #define PGMTRAP_NEWAREA (EXCV_BASE + (5 * STATE_T_SIZE))
 #define SYSBK_OLDAREA   (EXCV_BASE + (6 * STATE_T_SIZE))
 #define SYSBK_NEWAREA   (EXCV_BASE + (7 * STATE_T_SIZE))
+#define FRAMESIZE       1024
 
 // Funzioni esterne
 extern void termprint(char *str);
@@ -43,10 +44,15 @@ extern void termprint(char *str);
         state->status = state->status & ~STATUS_KUc; /* Kernel mode ON */ \
         state->status = state->status & ~STATUS_TE; /* Timer OFF */ \
         state->status = state->status & ~STATUS_IEc; /* Interrupt mascherati */ \
-        breakpoint();\
-        state->status = 0xABCDABCD; \
         })
-#define PROCESS_SETUP(process,entry) ({})
+#define PROCESS_SETUP(process,entry,priority) ({ \
+        process->p_s.status = process->p_s.status & ~STATUS_VMc; /* Virtual memory OFF */ \
+        process->p_s.status = process->p_s.status & ~STATUS_KUc; /* Kernel mode ON */ \
+        process->p_s.status = process->p_s.status | STATUS_TE; /* Timer ON */ \
+        process->p_s.status = process->p_s.status | STATUS_IEc; /* Interrupt abilitati */ \
+        process->p_s.gpr[26] = RAMTOP - FRAMESIZE * priority; /* Imposta RAM adeguata */ \
+        process->p_s.pc_epc = entry; /* Imposta pc all'entry point */ \
+        })
 
 #endif
 
@@ -61,10 +67,10 @@ extern void termprint(char *str);
         state->CP15_Control = CP15_DISABLE_VM(state->CP15_Control); /* DISABLE_VM(state) */ \
         state->cpsr = STATUS_ALL_INT_DISABLE(state->cpsr) | STATUS_SYS_MODE; /* Kernel mode ON, timer e interrupt mascherati */ \
         })
-#define PROCESS_SETUP(process,entry) ({ \
+#define PROCESS_SETUP(process,entry,priority) ({ \
         process->p_s.cpsr = STATUS_ALL_INT_ENABLE(process->p_s.cpsr) | STATUS_SYS_MODE; /* Abilito interrupt, timer e kernel mode */ \
         process->p_s.CP15_Control = CP15_DISABLE_VM(process->p_s.CP15_Control); /* VM disabilitata */ \
-        process->p_s.sp = RAM_TOP - FRAMESIZE * priority; /* Imposta RAM adeguata */ \
+        process->p_s.sp = RAMTOP - FRAMESIZE * priority; /* Imposta RAM adeguata */ \
         process->p_s.pc = entry_point; /* Imposta pc all'entry point */ \
         })
 
@@ -109,6 +115,6 @@ void update_state(state_t *old_st, state_t* new_st);
 void initNewArea(memaddr new_area, memaddr handler);
 
 // Inizializza un pcb e il processo ad esso associato
-void create_process(memaddr entry_point, pcb_t* process_block, unsigned priority);
+void createProcess(memaddr entry_point, pcb_t* process_block, unsigned priority);
 
 #endif

@@ -50,6 +50,7 @@ int get_device_nr(unsigned bitmap){
     }
     return -1;
     */
+    return 0;
 }
 
 void int_handler(){

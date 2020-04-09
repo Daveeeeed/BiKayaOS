@@ -65,8 +65,8 @@ void initNewArea(memaddr new_area, memaddr handler){
     return;
 }
 
-void create_process(memaddr entry_point, pcb_t* process_block, unsigned priority){
-    PROCESS_SETUP(process_block, entry_point);
+void createProcess(memaddr entry_point, pcb_t* process_block, unsigned priority){
+    PROCESS_SETUP(process_block, entry_point,priority);
     // Imposta priorità
     process_block->priority = priority;
     process_block->original_priority = priority;
