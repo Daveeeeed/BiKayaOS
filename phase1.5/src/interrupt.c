@@ -2,14 +2,6 @@
 #include "utils.h"
 #include "scheduler.h"
 
-#ifdef TARGET_UMPS
-
-#endif
-
-#ifdef TARGET_UARM
-
-#endif
-
 void disk_handler(){
     tprint("Disk interrupt handler\n");
 }
@@ -27,54 +19,50 @@ void printer_handler(){
 }
 
 void terminal_handler(){
-    /*
-    memaddr* interrupt_bitmap = (memaddr*) CDEV_BITMAP_ADDR(INT_TERMINAL);
+    memaddr* interrupt_bitmap = (memaddr*) CDEV_BITMAP_ADDR(IL_TERMINAL);
     int device_nr = get_device_nr(*interrupt_bitmap);
     if (device_nr < 0) PANIC();
-    termreg_t* term = (termreg_t*) DEV_REG_ADDR(INT_TERMINAL, device_nr);
-    if ((term->recv_status & TERM_STATUS_MASK) == DEV_TRCV_S_CHARRECV){
-        term->recv_command = DEV_C_ACK;
+    termreg_t* term = (termreg_t*) DEV_REG_ADDR(IL_TERMINAL, device_nr);
+    if ((term->recv_status & TERM_STATUS_MASK) == ST_TRANS_RECV){
+        term->recv_command = CMD_ACK;
     }
-    if ((term->transm_status & TERM_STATUS_MASK) == DEV_TTRS_S_CHARTRSM){
-        term->transm_command = DEV_C_ACK;
+    if ((term->transm_status & TERM_STATUS_MASK) == ST_TRANS_RECV){
+        term->transm_command = CMD_ACK;
     }
-    */
 }
 
+// DA CONTROLLARE
 int get_device_nr(unsigned bitmap){
-    /*
+
     int i;
     for (i = 0; i < 8; i++){
         if (bitmap == 1) return i;
         else bitmap = bitmap >> 1;
     }
     return -1;
-    */
-    return 0;
 }
 
 void int_handler(){
-    /*
+    unsigned cause;
     state_t* old_state = (state_t*) INT_OLDAREA;
-    old_state->pc = old_state->pc - 4;
-    update_state(old_state, &current_process->p_s);
-    unsigned cause = old_state->CP15_Cause;
-    if(CAUSE_IP_GET(cause, INT_TIMER)){
+    PC(old_state);
+    UPDATE_STATE(old_state, &current_process->p_s);
+    GCAUSE(cause, old_state);
+    if(CAUSE_IP_GET(cause, IL_TIMER)){
         timer_on = 0;
-    } else if(CAUSE_IP_GET(cause, INT_DISK)){
+    } else if(CAUSE_IP_GET(cause, IL_DISK)){
         disk_handler();
-    } else if(CAUSE_IP_GET(cause, INT_TAPE)){
+    } else if(CAUSE_IP_GET(cause, IL_TAPE)){
         tape_handler();
-    } else if(CAUSE_IP_GET(cause, INT_UNUSED)){
+    } else if(CAUSE_IP_GET(cause, IL_ETHERNET)){
         network_handler();
-    } else if(CAUSE_IP_GET(cause, INT_PRINTER)){
+    } else if(CAUSE_IP_GET(cause, IL_PRINTER)){
         printer_handler();
-    } else if(CAUSE_IP_GET(cause, INT_TERMINAL)){
+    } else if(CAUSE_IP_GET(cause, IL_TERMINAL)){
         terminal_handler();
     } else{
         tprint("Raised unknown interrupt\n");
         PANIC();
     }
     scheduler();
-    */
 }

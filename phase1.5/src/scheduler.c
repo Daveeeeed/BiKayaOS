@@ -5,7 +5,6 @@ void scheduler(){
     if (current_process == NULL && !emptyProcQ(getQueue())){
         current_process = removeProcQ(getQueue());
         timer_on = 1;
-        breakpoint();
         setTIMER(TIME_SLICE);
     }
     if (current_process == NULL && emptyProcQ(getQueue())){

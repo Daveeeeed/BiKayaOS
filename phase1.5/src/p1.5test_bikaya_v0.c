@@ -81,6 +81,8 @@ void termprint(char *str) {
 #define termprint(str) tprint(str);
 #endif
 
+extern void breakpoint();
+
 char *toprint[] = {
     "1                        \n",  "2          _nnnn_        \n",  "3         dGGGGMMb       \n",
     "4        @p~qp~~qMb      \n",  "5        M|@||@) M|      \n",  "6        @,----.JM|      \n",
@@ -131,7 +133,7 @@ void test2() {
 void test3() {
     int i = 0;
     termprint("Entering test3!\n");
-
+    breakpoint();
     test3_baton[0] = 1;
     for (i = 0; i < STEPS; i++) {
         while (test2_baton[i] == 0)

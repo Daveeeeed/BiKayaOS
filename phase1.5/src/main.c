@@ -6,10 +6,10 @@
 int main(){
 
     // Inizializza le New Area
-    initNewArea((memaddr) SYSBK_NEWAREA, (memaddr) tlbHandler);
-    initNewArea((memaddr) PGMTRAP_NEWAREA, (memaddr) tlbHandler);
+    initNewArea((memaddr) SYSBK_NEWAREA, (memaddr) sys_handler);
+    initNewArea((memaddr) PGMTRAP_NEWAREA, (memaddr) trapHandler);
     initNewArea((memaddr) TLB_NEWAREA, (memaddr) tlbHandler);
-    initNewArea((memaddr) INT_NEWAREA, (memaddr) tlbHandler);
+    initNewArea((memaddr) INT_NEWAREA, (memaddr) int_handler);
 
     // Inizializza la pcb free
     initPcbs();

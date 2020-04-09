@@ -1,14 +1,6 @@
 #ifndef _SYSCALL_H
 #define _SYSCALL_H
 
-#ifdef TARGET_UMPS
-
-#endif
-
-#ifdef TARGET_UARM
-
-#endif
-
 #define TERMINATEPROCESS 3
 
 // Gestore System Call
