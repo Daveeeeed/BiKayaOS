@@ -1,12 +1,10 @@
 #ifndef _SYSCALL_H
 #define _SYSCALL_H
 
-#define TERMINATEPROCESS 3
-
-// Gestore System Call
-void sys_handler();
+// Gestore system call
+void sysHandler();
 
 // #3 System Call: termina il processo corrente
-void terminate_process();
+void terminateProcess();
 
 #endif

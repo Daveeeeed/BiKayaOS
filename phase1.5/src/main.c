@@ -1,12 +1,12 @@
-#include "utils.h"
-#include "scheduler.h"
-#include "interrupt.h"
-#include "syscall.h"
+#include "utils.h" // per altre funzioni
+#include "scheduler.h" // per scheduler
+#include "interrupt.h" // per inthandler
+#include "syscall.h" // per sys_handler
 
 int main(){
 
     // Inizializza le New Area
-    initNewArea((memaddr) SYSBK_NEWAREA, (memaddr) sys_handler);
+    initNewArea((memaddr) SYSBK_NEWAREA, (memaddr) sysHandler);
     initNewArea((memaddr) PGMTRAP_NEWAREA, (memaddr) trapHandler);
     initNewArea((memaddr) TLB_NEWAREA, (memaddr) tlbHandler);
     initNewArea((memaddr) INT_NEWAREA, (memaddr) int_handler);

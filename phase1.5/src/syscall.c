@@ -5,38 +5,32 @@
 #include "scheduler.h"
 #include "utils.h"
 
-#ifdef TARGET_UMPS
-
-#define SYS_REG reg_a0
-
-#elif defined(TARGET_UARM)
-
-#define SYS_REG a1
-
-#endif
-
-void sys_handler(){
-
+void sysHandler(){
     state_t *old_state = (state_t*) SYSBK_OLDAREA;
-    unsigned arg_sys = old_state->SYS_REG;
+    unsigned arg_sys;
+    #ifdef TARGET_UMPS
+    arg_sys = old_state->reg_a0;
+    #elif defined(TARGET_UARM)
+    arg_sys = old_state->a1;
+    #endif
     switch(arg_sys){
-        case TERMINATEPROCESS:
-            terminate_process();
+        case TERMINATE_PROCESS:
+            terminateProcess();
             break;
         default:
-            tprint("System Call non riconosciuta\n");
+            tprint("System Call non riconosciuta o gestita\n");
             break;
     }
     scheduler();
     return;
-    }
+}
 
-void terminate_process(){
+void terminateProcess(){
     if(emptyChild(current_process)){
         freePcb(current_process);
         current_process = NULL;
     } else {
         removeChild(current_process);
-        terminate_process();
+        terminateProcess();
     }
 }

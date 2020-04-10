@@ -1,26 +1,6 @@
 #ifndef _INTERRUPT_H
 #define _INTERRUPT_H
 
-#define ST_NOT_INSTALLED   0
-#define ST_READY           1
-#define ST_ILLEGAL_OP      2
-#define ST_BUSY            3
-#define ST_ERROR           4
-#define ST_TRANS_RECV      5
-
-#define CMD_RESET          0
-#define CMD_ACK            1
-#define CMD_TRANS_RECV     2
-
-#define CHAR_OFFSET        8
-#define TERM_STATUS_MASK   0xFF
-
-#ifdef TARGET_UMPS
-
-#define CAUSE_IP_GET(cause, line)((cause) & CAUSE_IP(line))
-
-#endif
-
 // DTNP handler
 void disk_handler();
 void tape_handler();

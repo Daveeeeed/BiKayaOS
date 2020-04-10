@@ -18,6 +18,7 @@ void printer_handler(){
     tprint("Printer interrupt handler\n");
 }
 
+// TODO: da scrivere per uMPS
 void terminal_handler(){
     memaddr* interrupt_bitmap = (memaddr*) CDEV_BITMAP_ADDR(IL_TERMINAL);
     int device_nr = get_device_nr(*interrupt_bitmap);
@@ -43,6 +44,7 @@ int get_device_nr(unsigned bitmap){
 }
 
 void int_handler(){
+    /*
     unsigned cause;
     state_t* old_state = (state_t*) INT_OLDAREA;
     PC(old_state);
@@ -65,4 +67,17 @@ void int_handler(){
         PANIC();
     }
     scheduler();
+    */
+   unsigned cause;
+   state_t* old_state = (state_t*) INT_OLDAREA;
+   #ifdef TARGET_UMPS
+   old_state->pc_epc = old_state->pc_epc - 4;
+   cause = old_state->cause;
+   #elif defined(TARGET_UARM)
+   old_state->pc = old_state->pc - 4;
+   cause = old_state->CP15_Cause;
+   #endif
+   copyState(old_state, &current_process->p_s);
+   timer_on = 0;
+   scheduler();
 }
