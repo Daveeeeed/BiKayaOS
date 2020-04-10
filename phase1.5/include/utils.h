@@ -28,12 +28,10 @@
 
 #ifdef TARGET_UMPS
 
-// Inclusioni
 #include "umps/libumps.h"
 #include "umps/arch.h"
 #include "cp0.h"
 
-// Variabili
 #define STATE_T_SIZE    0x0000008C
 #define EXCV_BASE       0x20000000
 #define INT_OLDAREA     EXCV_BASE
@@ -49,15 +47,19 @@
 // Funzioni esterne
 extern void termprint(char *str);
 
-// Definizioni funzioni secondo caratteristiche di architettura
+// Ridefinizioni per architettura uMPS
 #define tprint(str) termprint(str)
 
 #define CAUSE_IP_GET(cause,line) (cause & CAUSE_IP_MASK) & CAUSE_IP(line)
+
+#define TIMER_USED IL_CPUTIMER
 
 #elif defined(TARGET_UARM)
 
 #include "uarm/libuarm.h"
 #include "uarm/arch.h"
+
+#define TIMER_USED IL_TIMER
 
 #endif
 
@@ -81,16 +83,8 @@ pcb_t *first_t,*second_t,*third_t;
 // Processo attivo
 pcb_t *current_process;
 
-// Funzioni esterne di test collocate in p1.5test_bikaya_v0.c
-extern void test1();
-extern void test2();
-extern void test3();
-
-// Gestore system call
-extern void sysHandler();
-
 // Funzione di debug
-extern void breakpoint();
+void breakpoint();
 
 // Gestori inutilmente utili
 void trapHandler();

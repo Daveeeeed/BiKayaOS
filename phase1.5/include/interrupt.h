@@ -2,19 +2,19 @@
 #define _INTERRUPT_H
 
 // DTNP handler
-void disk_handler();
-void tape_handler();
-void network_handler();
-void printer_handler();
+void diskHandler();
+void tapeHandler();
+void networkHandler();
+void printerHandler();
 
 // Terminal handler
-void terminal_handler();
+void terminalHandler();
 
 // Data una bitmap restituisce l'indice del device che ha sollevato un interrupt
-int get_device_nr(unsigned bitmap);
+int getDeviceNr(unsigned bitmap);
 
 // Gestore di interrupt
-void int_handler();
+void intHandler();
 
 #endif
 

@@ -42,7 +42,7 @@ void STST(void *addr);
 /* call kernel system call handler */
 int SYSCALL(unsigned int sysNum, unsigned int arg1, unsigned int arg2, unsigned int arg3);
 
-/* rasie breakpoint exception */
+/* raise breakpoint exception */
 void BREAK(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3);
 
 /* access special registers */

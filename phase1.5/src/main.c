@@ -1,7 +1,12 @@
-#include "utils.h" // per altre funzioni
-#include "scheduler.h" // per scheduler
-#include "interrupt.h" // per inthandler
-#include "syscall.h" // per sys_handler
+#include "utils.h"
+#include "scheduler.h"
+#include "interrupt.h"
+#include "syscall.h"
+
+// Funzioni esterne di test collocate in p1.5test_bikaya_v0.c
+extern void test1();
+extern void test2();
+extern void test3();
 
 int main(){
 
@@ -9,7 +14,7 @@ int main(){
     initNewArea((memaddr) SYSBK_NEWAREA, (memaddr) sysHandler);
     initNewArea((memaddr) PGMTRAP_NEWAREA, (memaddr) trapHandler);
     initNewArea((memaddr) TLB_NEWAREA, (memaddr) tlbHandler);
-    initNewArea((memaddr) INT_NEWAREA, (memaddr) int_handler);
+    initNewArea((memaddr) INT_NEWAREA, (memaddr) intHandler);
 
     // Inizializza la pcb free
     initPcbs();

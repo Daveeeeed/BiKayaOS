@@ -3,26 +3,31 @@
 #include "scheduler.h"
 
 // TODO: da scrivere per uARM e uMPS
-void disk_handler(){
+void diskHandler(){
     tprint("Disk interrupt handler\n");
+    HALT();
 }
 
-void tape_handler(){
+void tapeHandler(){
     tprint("Tape interrupt handler\n");
+    HALT();
 }
 
-void network_handler(){
+void networkHandler(){
     tprint("Network interrupt handler\n");
+    HALT();
 }
 
-void printer_handler(){
+void printerHandler(){
     tprint("Printer interrupt handler\n");
+    HALT();
 }
 
-// TODO: da scrivere per uMPS
-void terminal_handler(){
+// TODO: su uMPS non possono essere gestiti causa termprint
+// modificare termprint o mascherare gestione interrupt terminale
+void terminalHandler(){
     memaddr* interrupt_bitmap = (memaddr*) CDEV_BITMAP_ADDR(IL_TERMINAL);
-    int device_nr = get_device_nr(*interrupt_bitmap);
+    int device_nr = getDeviceNr(*interrupt_bitmap);
     if (device_nr < 0) PANIC();
     termreg_t* term = (termreg_t*) DEV_REG_ADDR(IL_TERMINAL, device_nr);
     if ((term->recv_status & TERM_STATUS_MASK) == ST_TRANS_RECV){
@@ -31,10 +36,10 @@ void terminal_handler(){
     if ((term->transm_status & TERM_STATUS_MASK) == ST_TRANS_RECV){
         term->transm_command = CMD_ACK;
     }
+    return;
 }
 
-// TODO: da controllare per uMPS
-int get_device_nr(unsigned bitmap){
+int getDeviceNr(unsigned bitmap){
     int i;
     for (i = 0; i < 8; i++){
         if (bitmap == 1) return i;
@@ -43,7 +48,7 @@ int get_device_nr(unsigned bitmap){
     return -1;
 }
 
-void int_handler(){
+void intHandler(){
     unsigned cause;
     state_t* old_state = (state_t*) INT_OLDAREA;
     #ifdef TARGET_UMPS
@@ -53,18 +58,18 @@ void int_handler(){
     cause = old_state->CP15_Cause;
     #endif
     copyState(old_state, &current_process->p_s);
-    if(CAUSE_IP_GET(cause, IL_TIMER)){
+    if(CAUSE_IP_GET(cause, TIMER_USED)){
         timer_on = 0;
     } else if(CAUSE_IP_GET(cause, IL_DISK)){
-        disk_handler();
+        diskHandler();
     } else if(CAUSE_IP_GET(cause, IL_TAPE)){
-        tape_handler();
+        tapeHandler();
     } else if(CAUSE_IP_GET(cause, IL_ETHERNET)){
-        network_handler();
+        networkHandler();
     } else if(CAUSE_IP_GET(cause, IL_PRINTER)){
-        printer_handler();
+        printerHandler();
     } else if(CAUSE_IP_GET(cause, IL_TERMINAL)){
-        terminal_handler();
+        terminalHandler();
     } else{
         tprint("Raised unknown interrupt\n");
         PANIC();

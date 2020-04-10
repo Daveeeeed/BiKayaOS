@@ -45,12 +45,12 @@ void createProcess(memaddr entry_point, pcb_t* process_block, unsigned priority)
     process_block->p_s.status = process_block->p_s.status & ~(STATUS_KUc | STATUS_KUp | STATUS_KUo); /* Kernel mode ON */
     process_block->p_s.status = process_block->p_s.status | STATUS_TE; /* Timer ON */
     process_block->p_s.status = process_block->p_s.status | STATUS_IEc | STATUS_IEp | STATUS_IEo; /* Interrupt abilitati */
-    process_block->p_s.status = process_block->p_s.status | STATUS_IM_MASK; /* Attiva tutti gli interrupt */
+    process_block->p_s.status = process_block->p_s.status | STATUS_IM(1); /* Attiva solamente l'interrupt del cpu timer */
     process_block->p_s.reg_sp = RAMTOP - FRAMESIZE * priority; /* Imposta RAM adeguata */
     process_block->p_s.pc_epc = entry_point; /* Imposta pc all'entry point */
     #elif defined(TARGET_UARM)
-    process_block->p_s.cpsr = STATUS_ALL_INT_ENABLE(process_block->p_s.cpsr) | STATUS_SYS_MODE; /* Abilito interrupt, timer e kernel mode */
-    process_block->p_s.CP15_Control = CP15_DISABLE_VM(process_block->p_s.CP15_Control); /* VM disabilitata */
+    process_block->p_s.cpsr = STATUS_ALL_INT_ENABLE(process_block->p_s.cpsr) | STATUS_SYS_MODE; /* Interrupt, timer e kernel mode ON */
+    process_block->p_s.CP15_Control = CP15_DISABLE_VM(process_block->p_s.CP15_Control); /* Virtual memory OFF */
     process_block->p_s.sp = RAMTOP - FRAMESIZE * priority; /* Imposta RAM adeguata */
     process_block->p_s.pc = entry_point; /* Imposta pc all'entry point */
     #endif
