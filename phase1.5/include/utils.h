@@ -52,6 +52,8 @@ extern void termprint(char *str);
 // Definizioni funzioni secondo caratteristiche di architettura
 #define tprint(str) termprint(str)
 
+#define CAUSE_IP_GET(cause,line) (cause & CAUSE_IP_MASK) & CAUSE_IP(line)
+
 #elif defined(TARGET_UARM)
 
 #include "uarm/libuarm.h"

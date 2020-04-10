@@ -45,7 +45,7 @@ void createProcess(memaddr entry_point, pcb_t* process_block, unsigned priority)
     process_block->p_s.status = process_block->p_s.status & ~(STATUS_KUc | STATUS_KUp | STATUS_KUo); /* Kernel mode ON */
     process_block->p_s.status = process_block->p_s.status | STATUS_TE; /* Timer ON */
     process_block->p_s.status = process_block->p_s.status | STATUS_IEc | STATUS_IEp | STATUS_IEo; /* Interrupt abilitati */
-    process_block->p_s.status = process_block->p_s.status | STATUS_IM(1); /* Maschera tutti gli interrupt tranne quello del timer */
+    process_block->p_s.status = process_block->p_s.status | STATUS_IM_MASK; /* Attiva tutti gli interrupt */
     process_block->p_s.reg_sp = RAMTOP - FRAMESIZE * priority; /* Imposta RAM adeguata */
     process_block->p_s.pc_epc = entry_point; /* Imposta pc all'entry point */
     #elif defined(TARGET_UARM)

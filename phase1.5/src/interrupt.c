@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "scheduler.h"
 
+// TODO: da scrivere per uARM e uMPS
 void disk_handler(){
     tprint("Disk interrupt handler\n");
 }
@@ -32,9 +33,8 @@ void terminal_handler(){
     }
 }
 
-// DA CONTROLLARE
+// TODO: da controllare per uMPS
 int get_device_nr(unsigned bitmap){
-
     int i;
     for (i = 0; i < 8; i++){
         if (bitmap == 1) return i;
@@ -44,12 +44,15 @@ int get_device_nr(unsigned bitmap){
 }
 
 void int_handler(){
-    /*
     unsigned cause;
     state_t* old_state = (state_t*) INT_OLDAREA;
-    PC(old_state);
-    UPDATE_STATE(old_state, &current_process->p_s);
-    GCAUSE(cause, old_state);
+    #ifdef TARGET_UMPS
+    cause = old_state->cause;
+    #elif defined(TARGET_UARM)
+    old_state->pc = old_state->pc - 4;
+    cause = old_state->CP15_Cause;
+    #endif
+    copyState(old_state, &current_process->p_s);
     if(CAUSE_IP_GET(cause, IL_TIMER)){
         timer_on = 0;
     } else if(CAUSE_IP_GET(cause, IL_DISK)){
@@ -67,17 +70,4 @@ void int_handler(){
         PANIC();
     }
     scheduler();
-    */
-   unsigned cause;
-   state_t* old_state = (state_t*) INT_OLDAREA;
-   #ifdef TARGET_UMPS
-   old_state->pc_epc = old_state->pc_epc - 4;
-   cause = old_state->cause;
-   #elif defined(TARGET_UARM)
-   old_state->pc = old_state->pc - 4;
-   cause = old_state->CP15_Cause;
-   #endif
-   copyState(old_state, &current_process->p_s);
-   timer_on = 0;
-   scheduler();
 }
