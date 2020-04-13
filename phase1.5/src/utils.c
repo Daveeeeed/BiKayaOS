@@ -61,7 +61,6 @@ void createProcess(memaddr entry_point, pcb_t* process_block, unsigned priority)
     insertProcQ(&ready_queue, process_block);
 }
 
-// TODO: verificare il range del 'for'
 void copyState(state_t* src, state_t* dest){
     #ifdef TARGET_UMPS
     for(int i = 0; i < 31; i++) dest->gpr[i] = src->gpr[i];

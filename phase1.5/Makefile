@@ -5,7 +5,12 @@ default:
 umps:
 	@mkdir -p build
 	@$(MAKE) -f uarmmake clean
-	@$(MAKE) -f umpsmake
+	@$(MAKE) -f umpsmake PACK=mipsel-linux-gnu
+
+umps1:
+	@mkdir -p build
+	@$(MAKE) -f uarmmake clean
+	@$(MAKE) -f umpsmake PACK=mipsisa64r6el-linux-gnuabi64
 
 uarm:
 	@mkdir -p build

@@ -1,6 +1,6 @@
 # Cross toolchain variables
 # If these are not in your path, you can make them absolute.
-CC = mipsisa64r6el-linux-gnuabi64-gcc
+CC = $(PACK)-gcc
 LD = mipsel-linux-gnu-ld
 
 # Paths
