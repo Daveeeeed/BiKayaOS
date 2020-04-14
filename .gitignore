@@ -1,4 +1,4 @@
 phase0/.vscode
 phase0/.vs
-
+*/.vs*
 *.o
