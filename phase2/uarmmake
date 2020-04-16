@@ -1,0 +1,48 @@
+# Cross toolchain variables
+# If these are not in your path, you can make them absolute.
+XT_PRG_PREFIX = arm-none-eabi-
+CC = $(XT_PRG_PREFIX)gcc
+LD = $(XT_PRG_PREFIX)ld
+
+# Paths
+INCLUDE_DIR = ./scr ./src/uarm ./include ./include/uarm
+OUTPUT_DIR = ./build
+VPATH = $(INCLUDE_DIR)
+
+# Files
+SRCS := $(wildcard src/*.c) crtso.s libuarm.s libdiv.s
+OBJS_TMP := $(SRCS:.s=.o)
+OBJS := $(OBJS_TMP:.c=.o)
+
+# Compiler options
+CFLAGS_LANG = 
+CFLAGS_UARM = -mcpu=arm7tdmi -DTARGET_UARM=1
+CFLAGS = $(CFLAGS_LANG) $(CFLAGS_UARM) $(addprefix -I ,$(INCLUDE_DIR)) -Wall -O0
+
+# Linker options
+LDFLAGS = -G 0 -nostdlib -T src/uarm/elf32ltsarm.h.uarmcore.x
+
+# Commands
+.PHONY : all clean
+
+all : kernel
+
+kernel : $(OBJS)
+	$(LD) -o $(OUTPUT_DIR)/$@ $(addprefix $(OUTPUT_DIR)/,$(subst src/,,$^)) $(LDFLAGS)
+
+clean:
+	-rm -f $(OUTPUT_DIR)/*
+
+# Generic pattern
+define COMPILE_PATTERN
+	$(CC) $(CFLAGS) -c -o $@ $<
+	mv $@ $(OUTPUT_DIR)/
+endef
+
+# Rule for C modules
+%.o : %.c
+	$(COMPILE_PATTERN)
+
+# Rule for assembly modules
+%.o : %.s
+	$(COMPILE_PATTERN)
