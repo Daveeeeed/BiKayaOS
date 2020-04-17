@@ -36,6 +36,14 @@ typedef struct pcb_t {
 
     /* key of the semaphore on which the process is eventually blocked */
     int *p_semkey;
+
+    /* utilities clock */
+    unsigned start_time; /* tempo della prima attivazione */
+    unsigned user_time; /* tempo trascorso in user mode */
+    unsigned kernel_time; /* tempo trascorso in kernel mode */
+    unsigned last_user_switch; /* tempo dell'ultimo passaggio a user mode */
+    unsigned last_kernel_switch; /* tempo dell'ultimo passaggio a kernel mode */
+
 } pcb_t;
 
 

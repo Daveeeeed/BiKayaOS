@@ -4,6 +4,7 @@
 #include "const.h"
 #include "listx.h"
 #include "pcb.h"
+#include "asl.h"
 
 // DA RIMUOVERE
 #define TOD_LO     *((unsigned int *)BUS_REG_TOD_LO)
@@ -42,46 +43,34 @@
 #define PGMTRAP_NEWAREA (EXCV_BASE + (5 * STATE_T_SIZE))
 #define SYSBK_OLDAREA   (EXCV_BASE + (6 * STATE_T_SIZE))
 #define SYSBK_NEWAREA   (EXCV_BASE + (7 * STATE_T_SIZE))
-#define FRAMESIZE       1024
 
 // Funzioni esterne
-extern void termprint(char *str);
+extern void print(char *str);
 
 // Ridefinizioni per architettura uMPS
-#define tprint(str) termprint(str)
-
 #define CAUSE_IP_GET(cause,line) (cause & CAUSE_IP_MASK) & CAUSE_IP(line)
-
-#define TIMER_USED IL_CPUTIMER
 
 #elif defined(TARGET_UARM)
 
 #include "uarm/libuarm.h"
 #include "uarm/arch.h"
 
-#define TIMER_USED IL_TIMER
-
 #endif
 
 // Priorità dei processi
 #define FIRST_PRIORITY  1
-#define SECOND_PRIORITY 2
-#define THIRD_PRIORITY  3
 
 // Tempo dedicato ad ogni processo
 #define TIME_SLICE 3000
 
-// System call
-#define TERMINATE_PROCESS 3
-
 // Bool timer attivato
 unsigned int timer_on;
 
-// PCB associati ai 3 processi test
-pcb_t *first_t,*second_t,*third_t;
+// Mappa degli indirizzi dei processi attivi
+unsigned proc_map[MAXPROC + 1];
 
 // Processo attivo
-pcb_t *current_process;
+pcb_t *current;
 
 // Funzione di debug
 void breakpoint();
@@ -97,7 +86,7 @@ struct list_head* getQueue();
 void initNewArea(memaddr new_area, memaddr handler);
 
 // Inizializza un pcb e il processo ad esso associato
-void createProcess(memaddr entry_point, pcb_t* process_block, unsigned priority);
+void initProcess(memaddr entry_point, unsigned priority);
 
 // Copia lo stato di src dentro dest
 void copyState(state_t* src, state_t* dest);

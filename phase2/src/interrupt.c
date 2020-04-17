@@ -4,22 +4,22 @@
 
 // TODO: da scrivere per uARM e uMPS
 void diskHandler(){
-    tprint("Disk interrupt handler\n");
+    print("Disk interrupt handler\n");
     HALT();
 }
 
 void tapeHandler(){
-    tprint("Tape interrupt handler\n");
+    print("Tape interrupt handler\n");
     HALT();
 }
 
 void networkHandler(){
-    tprint("Network interrupt handler\n");
+    print("Network interrupt handler\n");
     HALT();
 }
 
 void printerHandler(){
-    tprint("Printer interrupt handler\n");
+    print("Printer interrupt handler\n");
     HALT();
 }
 
@@ -49,6 +49,10 @@ int getDeviceNr(unsigned bitmap){
 }
 
 void intHandler(){
+    // TIME CONTROLLER
+    current_process->user_time = current_process->user_time + (getTODLO() - current_process->last_user_switch);
+    current_process->last_kernel_switch = getTODLO();
+
     unsigned cause;
     state_t* old_state = (state_t*) INT_OLDAREA;
     #ifdef TARGET_UMPS
@@ -71,7 +75,7 @@ void intHandler(){
     } else if(CAUSE_IP_GET(cause, IL_TERMINAL)){
         terminalHandler();
     } else{
-        tprint("Raised unknown interrupt\n");
+        print("Raised unknown interrupt\n");
         PANIC();
     }
     scheduler();

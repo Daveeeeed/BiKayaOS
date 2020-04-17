@@ -10,13 +10,21 @@ struct list_head* getQueue(){
 void breakpoint(){
 }
 
+// TODO CHECK
 void trapHandler(){
-    tprint("Risen trap handler, it's not handled so...");
+    // TIME CONTROLLER
+    current_process->user_time = current_process->user_time + (getTODLO() - current_process->last_user_switch);
+    current_process->last_kernel_switch = getTODLO();
+    print("Risen trap handler, it's not handled so...");
     HALT();
 }
 
+// TODO CHECK
 void tlbHandler(){
-    tprint("Risen TLB handler, it's not handled so...");
+    // TIME CONTROLLER
+    current_process->user_time = current_process->user_time + (getTODLO() - current_process->last_user_switch);
+    current_process->last_kernel_switch = getTODLO();
+    print("Risen TLB handler, it's not handled so...");
     HALT();
 }
 
@@ -24,41 +32,38 @@ void initNewArea(memaddr new_area, memaddr handler){
     state_t* new_state = (state_t*) new_area;
     STST(new_state);
     #ifdef TARGET_UMPS
-    new_state->pc_epc = handler; /* Program counter a handler */
-    new_state->reg_sp = RAMTOP; /* Stack pointer a RAM_TOP */
     new_state->status = new_state->status & ~(STATUS_VMc | STATUS_VMp | STATUS_VMo); /* Virtual memory OFF */
     new_state->status = new_state->status & ~(STATUS_KUc | STATUS_KUp | STATUS_KUo); /* Kernel mode ON */
     new_state->status = new_state->status & ~STATUS_TE; /* Timer OFF */
     new_state->status = new_state->status & ~(STATUS_IEc | STATUS_IEp | STATUS_IEo); /* Interrupt mascherati */
+    new_state->reg_sp = RAMTOP; /* Stack pointer a RAM_TOP */
+    new_state->pc_epc = handler; /* Imposta pc all'handler */
     #elif defined(TARGET_UARM)
-    new_state->pc = handler; /* Program counter  handler */
+    new_state->CP15_Control = CP15_DISABLE_VM(new_state->CP15_Control); /* Virtual memory OFF */
+    new_state->cpsr = STATUS_ALL_INT_DISABLE(new_state->cpsr) | STATUS_SYS_MODE; /* Kernel mode ON, timer e interrupt OFF */
     new_state->sp = RAMTOP; /* Stack pointer a RAM_TOP */
-    new_state->CP15_Control = CP15_DISABLE_VM(new_state->CP15_Control); /* DISABLE_VM(state) */
-    new_state->cpsr = STATUS_ALL_INT_DISABLE(new_state->cpsr) | STATUS_SYS_MODE; /* Kernel mode ON, timer e interrupt mascherati */
+    new_state->pc = handler; /* Imposta pc all'handler */
     #endif
 }
 
-// Mascherare solo interrupt timer o no? Se no, fare handler anche degli altri interrupt
-void createProcess(memaddr entry_point, pcb_t* process_block, unsigned priority){
+void initProcess(memaddr entry_point, unsigned priority){
+    state_t p_s;
+    // Imposta lo status del processo
     #ifdef TARGET_UMPS
-    process_block->p_s.status = process_block->p_s.status & ~(STATUS_VMc | STATUS_VMp | STATUS_VMo); /* Virtual memory OFF */
-    process_block->p_s.status = process_block->p_s.status & ~(STATUS_KUc | STATUS_KUp | STATUS_KUo); /* Kernel mode ON */
-    process_block->p_s.status = process_block->p_s.status | STATUS_TE; /* Timer ON */
-    process_block->p_s.status = process_block->p_s.status | STATUS_IEc | STATUS_IEp | STATUS_IEo; /* Interrupt abilitati */
-    process_block->p_s.status = process_block->p_s.status | STATUS_IM(1); /* Attiva solamente l'interrupt del cpu timer */
-    process_block->p_s.reg_sp = RAMTOP - FRAMESIZE * priority; /* Imposta RAM adeguata */
-    process_block->p_s.pc_epc = entry_point; /* Imposta pc all'entry point */
+    p_s.status = p_s.status & ~(STATUS_VMc | STATUS_VMp | STATUS_VMo); /* Virtual memory OFF */
+    p_s.status = p_s.status & ~(STATUS_KUc | STATUS_KUp | STATUS_KUo); /* Kernel mode ON */
+    p_s.status = p_s.status | STATUS_TE; /* Timer ON */
+    p_s.status = p_s.status | STATUS_IEc | STATUS_IEp | STATUS_IEo; /* Interrupt abilitati */
+    p_s.status = p_s.status | STATUS_IM_MASK; /* Attiva tutti gli interrupt */
+    p_s.reg_sp = RAMTOP - FRAMESIZE; /* TODO: Imposta RAM adeguata */
+    p_s.pc_epc = entry_point; /* Imposta pc all'entry point */
     #elif defined(TARGET_UARM)
-    process_block->p_s.cpsr = STATUS_ALL_INT_ENABLE(process_block->p_s.cpsr) | STATUS_SYS_MODE; /* Interrupt, timer e kernel mode ON */
-    process_block->p_s.CP15_Control = CP15_DISABLE_VM(process_block->p_s.CP15_Control); /* Virtual memory OFF */
-    process_block->p_s.sp = RAMTOP - FRAMESIZE * priority; /* Imposta RAM adeguata */
-    process_block->p_s.pc = entry_point; /* Imposta pc all'entry point */
+    p_s.CP15_Control = CP15_DISABLE_VM(p_s.CP15_Control); /* Virtual memory OFF */
+    p_s.cpsr = STATUS_ALL_INT_ENABLE(p_s.cpsr) | STATUS_SYS_MODE; /* Interrupt, timer e kernel mode ON */
+    p_s.sp = RAMTOP - FRAMESIZE; /* TODO: Imposta RAM adeguata */
+    p_s.pc = entry_point; /* Imposta pc all'entry point */
     #endif
-    // Imposta le priorità
-    process_block->priority = priority;
-    process_block->original_priority = priority;
-    // Inserisce il processo nella lista ready
-    insertProcQ(&ready_queue, process_block);
+    createProcess(&p_s, priority, 0);
 }
 
 void copyState(state_t* src, state_t* dest){
