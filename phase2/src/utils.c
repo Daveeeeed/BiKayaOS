@@ -13,8 +13,8 @@ void breakpoint(){
 // TODO CHECK
 void trapHandler(){
     // TIME CONTROLLER
-    current_process->user_time = current_process->user_time + (getTODLO() - current_process->last_user_switch);
-    current_process->last_kernel_switch = getTODLO();
+    current->user_time = current->user_time + (getTODLO() - current->last_user_switch);
+    current->last_kernel_switch = getTODLO();
     print("Risen trap handler, it's not handled so...");
     HALT();
 }
@@ -22,8 +22,8 @@ void trapHandler(){
 // TODO CHECK
 void tlbHandler(){
     // TIME CONTROLLER
-    current_process->user_time = current_process->user_time + (getTODLO() - current_process->last_user_switch);
-    current_process->last_kernel_switch = getTODLO();
+    current->user_time = current->user_time + (getTODLO() - current->last_user_switch);
+    current->last_kernel_switch = getTODLO();
     print("Risen TLB handler, it's not handled so...");
     HALT();
 }

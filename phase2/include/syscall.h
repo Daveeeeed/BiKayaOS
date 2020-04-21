@@ -1,6 +1,8 @@
 #ifndef _SYSCALL_H
 #define _SYSCALL_H
 
+#include "types_bikaya.h"
+
 // Gestore system call
 void sysHandler();
 
@@ -27,5 +29,8 @@ int specPassup(int type, state_t *old_st, state_t *new_st);
 
 // SYSCALL #8
 void getPid(void **pid, void **ppid);
+
+// Libera 
+void freeChildren(pcb_t *pid);
 
 #endif

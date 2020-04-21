@@ -8,6 +8,8 @@ extern void test1();
 extern void test2();
 extern void test3();
 
+int f;
+
 int main(){
 
     // Inizializza le New Area
@@ -19,6 +21,8 @@ int main(){
     // Inizializza la pcb free
     initPcbs();
     
+    f = SYSCALL(TERMINATE_PROCESS, 0, 0, 0);
+    breakpoint();
     // Alloca 3 pcb
     first_t = allocPcb();
     second_t = allocPcb();

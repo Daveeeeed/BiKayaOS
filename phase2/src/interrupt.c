@@ -50,8 +50,8 @@ int getDeviceNr(unsigned bitmap){
 
 void intHandler(){
     // TIME CONTROLLER
-    current_process->user_time = current_process->user_time + (getTODLO() - current_process->last_user_switch);
-    current_process->last_kernel_switch = getTODLO();
+    current->user_time = current->user_time + (getTODLO() - current->last_user_switch);
+    current->last_kernel_switch = getTODLO();
 
     unsigned cause;
     state_t* old_state = (state_t*) INT_OLDAREA;
@@ -61,8 +61,8 @@ void intHandler(){
     old_state->pc = old_state->pc - 4;
     cause = old_state->CP15_Cause;
     #endif
-    copyState(old_state, &current_process->p_s);
-    if(CAUSE_IP_GET(cause, TIMER_USED)){
+    copyState(old_state, &current->p_s);
+    if(CAUSE_IP_GET(cause, IL_TIMER)){
         timer_on = 0;
     } else if(CAUSE_IP_GET(cause, IL_DISK)){
         diskHandler();

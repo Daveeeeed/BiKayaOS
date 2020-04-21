@@ -14,11 +14,13 @@ int main(){
     initNewArea((memaddr) TLB_NEWAREA, (memaddr) tlbHandler);
     initNewArea((memaddr) INT_NEWAREA, (memaddr) intHandler);
 
+    proc_map[0] = 0;
+
     // Inizializza la pcb free
     initPcbs();
     initASL();
 
-    current_process = NULL;
+    current = NULL;
 
     // Istanzia i 3 processi di test nei pcb
     initProcess((memaddr) test, FIRST_PRIORITY);

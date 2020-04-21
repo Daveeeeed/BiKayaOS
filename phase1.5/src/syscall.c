@@ -5,7 +5,7 @@
 #include "scheduler.h"
 #include "utils.h"
 
-void sysHandler(){
+int sysHandler(){
     state_t *old_state = (state_t*) SYSBK_OLDAREA;
     unsigned arg_sys;
     #ifdef TARGET_UMPS
@@ -22,15 +22,16 @@ void sysHandler(){
             break;
     }
     scheduler();
-    return;
+    return 2;
 }
 
-void terminateProcess(){
-    if(emptyChild(current_process)){
-        freePcb(current_process);
-        current_process = NULL;
-    } else {
-        removeChild(current_process);
-        terminateProcess();
-    }
+int terminateProcess(){
+    //if(emptyChild(current_process)){
+    //    freePcb(current_process);
+    //    current_process = NULL;
+    //} else {
+    //    removeChild(current_process);
+    //    terminateProcess();
+    //}
+    return 1;
 }

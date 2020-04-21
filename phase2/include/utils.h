@@ -5,6 +5,7 @@
 #include "listx.h"
 #include "pcb.h"
 #include "asl.h"
+#include "const_bikaya.h"
 
 // DA RIMUOVERE
 #define TOD_LO     *((unsigned int *)BUS_REG_TOD_LO)
@@ -49,6 +50,10 @@ extern void print(char *str);
 
 // Ridefinizioni per architettura uMPS
 #define CAUSE_IP_GET(cause,line) (cause & CAUSE_IP_MASK) & CAUSE_IP(line)
+
+unsigned getTODLO(){
+    return TOD_LO;
+}
 
 #elif defined(TARGET_UARM)
 
