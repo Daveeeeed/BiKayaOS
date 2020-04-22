@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "syscall.h"
 
 // Coda dei processi attivi
 LIST_HEAD(ready_queue);
@@ -8,24 +9,6 @@ struct list_head* getQueue(){
 }
 
 void breakpoint(){
-}
-
-// TODO CHECK
-void trapHandler(){
-    // TIME CONTROLLER
-    current->user_time = current->user_time + (getTODLO() - current->last_user_switch);
-    current->last_kernel_switch = getTODLO();
-    print("Risen trap handler, it's not handled so...");
-    HALT();
-}
-
-// TODO CHECK
-void tlbHandler(){
-    // TIME CONTROLLER
-    current->user_time = current->user_time + (getTODLO() - current->last_user_switch);
-    current->last_kernel_switch = getTODLO();
-    print("Risen TLB handler, it's not handled so...");
-    HALT();
 }
 
 void initNewArea(memaddr new_area, memaddr handler){
@@ -48,6 +31,7 @@ void initNewArea(memaddr new_area, memaddr handler){
 
 void initProcess(memaddr entry_point, unsigned priority){
     state_t p_s;
+    STST(&p_s);
     // Imposta lo status del processo
     #ifdef TARGET_UMPS
     p_s.status = p_s.status & ~(STATUS_VMc | STATUS_VMp | STATUS_VMo); /* Virtual memory OFF */

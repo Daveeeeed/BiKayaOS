@@ -2,18 +2,18 @@
 #define _UTILS_H
 
 #include "const.h"
-#include "listx.h"
 #include "pcb.h"
 #include "asl.h"
 #include "const_bikaya.h"
 
-// DA RIMUOVERE
+// Definizoni mancanti
 #define TOD_LO     *((unsigned int *)BUS_REG_TOD_LO)
 #define TIME_SCALE *((unsigned int *)BUS_REG_TIME_SCALE)
 #define RAMBASE    *((unsigned int *)BUS_REG_RAM_BASE)
 #define RAMSIZE    *((unsigned int *)BUS_REG_RAM_SIZE)
 #define RAMTOP     (RAMBASE + RAMSIZE)
 
+// Definizioni per gestori interrupt mancanti
 #define ST_NOT_INSTALLED   0
 #define ST_READY           1
 #define ST_ILLEGAL_OP      2
@@ -32,8 +32,10 @@
 
 #include "umps/libumps.h"
 #include "umps/arch.h"
-#include "cp0.h"
+#include "umps/types.h"
+#include "umps/cp0.h"
 
+// Old e new area non definite su uMPS
 #define STATE_T_SIZE    0x0000008C
 #define EXCV_BASE       0x20000000
 #define INT_OLDAREA     EXCV_BASE
@@ -51,15 +53,13 @@ extern void print(char *str);
 // Ridefinizioni per architettura uMPS
 #define CAUSE_IP_GET(cause,line) (cause & CAUSE_IP_MASK) & CAUSE_IP(line)
 
-unsigned getTODLO(){
-    return TOD_LO;
-}
+#define BUS_TODLOW  0x1000001c
+#define getTODLO() (*((unsigned int *)BUS_TODLOW))
 
 #elif defined(TARGET_UARM)
-
 #include "uarm/libuarm.h"
 #include "uarm/arch.h"
-
+#include "uarm/uARMtypes.h"
 #endif
 
 // Priorità dei processi
@@ -67,6 +67,11 @@ unsigned getTODLO(){
 
 // Tempo dedicato ad ogni processo
 #define TIME_SLICE 3000
+
+// Codici per handler alternativi
+#define SYSBK_TYPE  0
+#define TLB_TYPE    1
+#define TRAP_TYPE   2
 
 // Bool timer attivato
 unsigned int timer_on;
@@ -79,10 +84,6 @@ pcb_t *current;
 
 // Funzione di debug
 void breakpoint();
-
-// Gestori inutilmente utili
-void trapHandler();
-void tlbHandler();
 
 // Ritorna la coda dei processi attivi
 struct list_head* getQueue();

@@ -44,6 +44,14 @@ typedef struct pcb_t {
     unsigned last_user_switch; /* tempo dell'ultimo passaggio a user mode */
     unsigned last_kernel_switch; /* tempo dell'ultimo passaggio a kernel mode */
 
+    /* alternative handler states */
+    state_t* old_sysbk;
+    state_t* new_sysbk;
+    state_t* old_tlb;
+    state_t* new_tlb;
+    state_t* old_trap;
+    state_t* new_trap;
+
 } pcb_t;
 
 

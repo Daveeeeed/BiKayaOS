@@ -1,6 +1,6 @@
 #ifndef _PCB_H
 #define _PCB_H
-#include <types_bikaya.h>
+#include "types_bikaya.h"
 
 // Inizializza pcb_free in modo da contenere tutti
 // gli elementi della pcb_table

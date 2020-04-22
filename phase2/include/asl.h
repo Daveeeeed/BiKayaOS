@@ -1,6 +1,6 @@
 #ifndef ASL_H
 #define ASL_H
-#include <types_bikaya.h>
+#include "types_bikaya.h"
 
 // Ritorna il semaforo con chiave pari a key, se
 // esiste, altrimenti NULL

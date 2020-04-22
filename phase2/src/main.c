@@ -2,6 +2,7 @@
 #include "scheduler.h"
 #include "interrupt.h"
 #include "syscall.h"
+#include "exception.h"
 
 // Funzioni esterne di test collocate in p1.5test_bikaya_v0.c
 extern void test();

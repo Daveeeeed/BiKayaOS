@@ -1,7 +1,7 @@
 #include "syscall.h"
 #include "scheduler.h"
 #include "utils.h"
-#include "const_bikaya.h"
+#include "exception.h"
 
 void sysHandler(){
     // TIME CONTROLLER
@@ -16,6 +16,7 @@ void sysHandler(){
     arg2 = old_state->reg_a2;
     arg3 = old_state->reg_a3;
     return_v = old_state->reg_v0;
+    old_state->pc_epc = old_state->pc_epc + 4;
     #elif defined(TARGET_UARM)
     arg0 = old_state->a1;
     arg1 = old_state->a2;
@@ -23,6 +24,7 @@ void sysHandler(){
     arg3 = old_state->a4;
     return_v = old_state->a1;
     #endif
+    copyState(old_state, &current->p_s);
     switch(arg0){
         case GETCPUTIME:
             getCpuTime((unsigned*) arg1, (unsigned*) arg2, (unsigned*) arg3);
@@ -49,8 +51,7 @@ void sysHandler(){
             getPid((void**) arg1, (void**) arg2);
             break;
         default:
-            print("System Call non riconosciuta o gestita\n");
-            terminateProcess(0); /* Termina il processo corrente */
+            specHandler(SYSBK_TYPE);
             break;
     }
     scheduler();
@@ -83,11 +84,14 @@ int createProcess(state_t *statep, int priority, void **cpid){
     proc_blk->start_time = 0;
     proc_blk->user_time = 0;
     proc_blk->kernel_time = 0;
+    proc_blk->new_sysbk = NULL;
+    proc_blk->new_trap = NULL;
+    proc_blk->new_tlb = NULL;
     // Inserisce il processo nella ready queue
     insertProcQ(getQueue(), proc_blk);
     // inserisce il processo come figlio del corrente
     insertChild(current, proc_blk);
-    *cpid = proc_blk;
+    if (cpid != NULL) *cpid = proc_blk;
     return 0;
 }
 
@@ -128,6 +132,38 @@ int waitIO(unsigned int command, unsigned int *reg, int subdevice){
 }
 
 int specPassup(int type, state_t *old_st, state_t *new_st){
+    switch (type) {
+    case SYSBK_TYPE:
+        if(current->new_sysbk != NULL){
+            current->new_sysbk = new_st;
+            current->old_sysbk = old_st;
+        } else {
+            terminateProcess(NULL);
+            return -1;
+        }
+        break;
+    case TLB_TYPE:
+        if(current->new_tlb != NULL){
+            current->new_tlb = new_st;
+            current->old_tlb = old_st;
+        } else {
+            terminateProcess(NULL);
+            return -1;
+        }
+        break;
+    case TRAP_TYPE:
+        if(current->new_trap != NULL){
+            current->new_trap = new_st;
+            current->old_trap = old_st;
+        } else {
+            terminateProcess(NULL);
+            return -1;
+        }
+        break;
+    default:
+        terminateProcess(NULL);
+        break;
+    }
     return 0;
 }
 
