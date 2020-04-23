@@ -50,8 +50,8 @@ int getDeviceNr(unsigned bitmap){
 
 void intHandler(){
     // TIME CONTROLLER
-    current->user_time = current->user_time + (getTODLO() - current->last_user_switch);
-    current->last_kernel_switch = getTODLO();
+    current->user_time = current->user_time + (getTODLO() - last_user_switch);
+    last_kernel_switch = getTODLO();
 
     unsigned cause;
     state_t* old_state = (state_t*) INT_OLDAREA;

@@ -5,15 +5,15 @@
 
 void trapHandler(){
     // TIME CONTROLLER
-    current->user_time = current->user_time + (getTODLO() - current->last_user_switch);
-    current->last_kernel_switch = getTODLO();
+    current->user_time = current->user_time + (getTODLO() - last_user_switch);
+    last_kernel_switch = getTODLO();
     specHandler(TRAP_TYPE);
 }
 
 void tlbHandler(){
     // TIME CONTROLLER
-    current->user_time = current->user_time + (getTODLO() - current->last_user_switch);
-    current->last_kernel_switch = getTODLO();
+    current->user_time = current->user_time + (getTODLO() - last_user_switch);
+    last_kernel_switch = getTODLO();
     specHandler(TLB_TYPE);
 }
 

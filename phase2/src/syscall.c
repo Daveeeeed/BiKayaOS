@@ -5,8 +5,8 @@
 
 void sysHandler(){
     // TIME CONTROLLER
-    current->user_time = current->user_time + (getTODLO() - current->last_user_switch);
-    current->last_kernel_switch = getTODLO();
+    current->user_time = current->user_time + (getTODLO() - last_user_switch);
+    last_kernel_switch = getTODLO();
 
     state_t *old_state = (state_t*) SYSBK_OLDAREA;
     unsigned arg0,arg1,arg2,arg3,return_v;
@@ -63,11 +63,10 @@ void freeChildren(pcb_t *pid){
     freePcb(pid);
 }
 
-// TODO: controllare wallclock
 void getCpuTime(unsigned int *user, unsigned int *kernel, unsigned int *wallclock){
-    *wallclock = getTODLO() - current->start_time;
-    user = &(current->user_time);
-    kernel = &(current->kernel_time);
+    if (wallclock!= NULL) *wallclock = getTODLO() - current->start_time;
+    if (user != NULL) user = &(current->user_time);
+    if (kernel != NULL) kernel = &(current->kernel_time);
 }
 
 int createProcess(state_t *statep, int priority, void **cpid){
@@ -114,7 +113,7 @@ void verhogen(int *semaddr){
     struct pcb_t* tmp;
     (*semaddr)++;
     tmp = headBlocked(semaddr);
-    if(*semaddr > 0 && tmp != NULL){
+    if(*semaddr >= 0 && tmp != NULL){
         tmp = removeBlocked(semaddr);
         insertProcQ(getQueue(), tmp);
     }
@@ -122,12 +121,14 @@ void verhogen(int *semaddr){
 
 void passeren(int *semaddr){
     (*semaddr)--;
-    if(*semaddr <= 0){
+    if(*semaddr < 0){
         insertBlocked(semaddr, current);
+        current = NULL;
     }
 }
 
 int waitIO(unsigned int command, unsigned int *reg, int subdevice){
+
     return 0;
 }
 

@@ -19,7 +19,9 @@
  *      Modified by Miro Mannino on May 8, 2010
  *      Modified by Mattia Maldini, Renzo Davoli 2020
  */
+
 extern void breakpoint();
+
 #ifdef TARGET_UMPS
 #include "umps/libumps.h"
 #include "umps/arch.h"
@@ -157,7 +159,7 @@ void print(char *msg) {
     char *       s    = msg;
     devregtr *   base = (devregtr *)DEV_REG_ADDR(IL_TERMINAL, 0);     // (devregtr *)(TERM0ADDR);
     devregtr     status;
-    
+
     SYSCALL(PASSEREN, (int)&term_mut, 0, 0); /* get term_mut lock */
 
     while (*s != '\0') {
@@ -187,15 +189,15 @@ void print(char *msg) {
 /*                 p1 -- the root process                            */
 /*                                                                   */
 void test() {
-    
+
     SYSCALL(VERHOGEN, (int)&testsem, 0, 0); /* V(testsem)   */
 
     if (testsem != 1) {
         print("error: p1 v(testsem) with no effects\n");
         PANIC();
     }
-    
-    print("p1 v(testsem)\n");
+
+    //print("p1 v(testsem)\n");
 
     /* set up states of the other processes */
 
@@ -229,17 +231,18 @@ void test() {
 
     /* create process p2 */
     SYSCALL(CREATEPROCESS, (int)&p2state, DEFAULT_PRIORITY, 0); /* start p2     */
-    print("p2 was started\n");
-
+    //print("p2 was started\n");
+    
     SYSCALL(VERHOGEN, (int)&startp2, 0, 0); /* V(startp2)   */
 
     /* P1 blocks until p2 finishes and Vs endp2 */
     SYSCALL(PASSEREN, (int)&endp2, 0, 0); /* P(endp2)     */
-    print("p1 knows p2 ended\n");
+    //print("p1 knows p2 ended\n");
 
     /* make sure we really blocked */
-    if (p1p2synch == 0)
+    if (p1p2synch == 0){
         print("error: p1/p2 synchronization bad\n");
+    }
 
     SYSCALL(CREATEPROCESS, (int)&p3state, DEFAULT_PRIORITY, (int)&p3pid);     //
 
@@ -299,8 +302,8 @@ void p2() {
 
     /* startp2 is initialized to 0. p1 Vs it then waits for p2 termination */
     SYSCALL(PASSEREN, (int)&startp2, 0, 0); /* P(startp2)   */
-
-    print("p2 starts\n");
+    
+    //print("p2 starts\n");
 
     /* initialize all semaphores in the s[] array */
     for (i = 0; i <= MAXSEM; i++)
@@ -314,7 +317,7 @@ void p2() {
             print("error: p2 bad v/p pairs\n");
     }
 
-    print("p2 v/p pairs successfully\n");
+    //print("p2 v/p pairs successfully\n");
 
     /* test of SYS6 */
 
@@ -341,11 +344,13 @@ void p2() {
             print("error: more cpu time than wallclock time\n");
         if ((now2 - now1) < (wallclock_t2 - wallclock_t1))
             print("error: more wallclock time than real time\n");
-        if ((user_t2 - user_t1) < MINLOOPTIME)
+        if ((user_t2 - user_t1) < MINLOOPTIME){
+            breakpoint();
             print("error: not enough cpu time went by\n");
+        }
+        
         print("p2 blew it!\n");
     }
-
     p1p2synch = 1; /* p1 will check this */
 
     SYSCALL(VERHOGEN, (int)&endp2, 0, 0); /* V(endp2)     */

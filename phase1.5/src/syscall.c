@@ -26,12 +26,12 @@ int sysHandler(){
 }
 
 int terminateProcess(){
-    //if(emptyChild(current_process)){
-    //    freePcb(current_process);
-    //    current_process = NULL;
-    //} else {
-    //    removeChild(current_process);
-    //    terminateProcess();
-    //}
+    if(emptyChild(current_process)){
+        freePcb(current_process);
+        current_process = NULL;
+    } else {
+        removeChild(current_process);
+        terminateProcess();
+    }
     return 1;
 }

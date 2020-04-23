@@ -79,6 +79,8 @@ unsigned int timer_on;
 // Mappa degli indirizzi dei processi attivi
 unsigned proc_map[MAXPROC + 1];
 
+unsigned last_user_switch,last_kernel_switch;
+
 // Processo attivo
 pcb_t *current;
 
