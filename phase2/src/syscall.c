@@ -127,9 +127,46 @@ void passeren(int *semaddr){
     }
 }
 
-int waitIO(unsigned int command, unsigned int *reg, int subdevice){
+unsigned deviceIndex(unsigned *reg, int subdevice){
+    unsigned dev_line,dev_pos,address;
+    address = (unsigned)reg;
+    if (address >= FIRST_ADDR_TERMINAL){
+        address -= FIRST_ADDR_TERMINAL;
+        if (subdevice) dev_line = INT_TERMINAL;
+        else dev_line = INT_TERMINAL + 1;
+    } else if (address >= FIRST_ADDR_PRINTER){
+        address -= FIRST_ADDR_PRINTER;
+        dev_line = INT_PRINTER;
+    } else if (address >= FIRST_ADDR_UNUSED){
+        address -= FIRST_ADDR_UNUSED;
+        dev_line = INT_UNUSED;
+    } else if (address >= FIRST_ADDR_TAPE){
+        address -= FIRST_ADDR_TAPE;
+        dev_line = INT_TAPE;
+    } else if (address >= FIRST_ADDR_DISK){
+        address -= FIRST_ADDR_DISK;
+        dev_line = INT_DISK;
+    }
+    dev_pos = address/10;
+    return (dev_line - 3) * 8 + dev_pos;
+}
 
-    return 0;
+int waitIO(unsigned int command, unsigned int *reg, int subdevice){
+    // ottengo il registro del comando del device
+    unsigned *cmd_reg = reg + 3 - 2 * subdevice;
+    // attivo il comando
+    *cmd_reg = command;
+    // ottengo l'indice del device
+    int i = deviceIndex(reg, subdevice);
+    // se non c'è nessuna risposta in attesa di essere trasmessa, blocco il processo sul semaforo del device
+    if (dev_response[i] == 0){
+        passeren(&dev_sem[i]);
+    // se c'è una risposta pronta per essere trasmessa la ritorno
+    } else {
+        unsigned tmp = dev_response[i];
+        dev_response[i] = 0;
+        return tmp;
+    }
 }
 
 int specPassup(int type, state_t *old_st, state_t *new_st){

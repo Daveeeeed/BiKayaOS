@@ -7,20 +7,21 @@ void scheduler(){
         current = removeProcQ(getQueue());
         timer_on = 1;
         setTIMER(TIME_SLICE);
-    // Se non ci sono processi ready e il processo corrente è NULL
-    } else if (current == NULL && emptyProcQ(getQueue())){
-        HALT();
     // Se deve essere eseguito un context switch
     } else if (timer_on == 0){
+        unsigned first_priority = 0;
         pcb_t *tmp = NULL;
         struct list_head* iterator;
         list_for_each(iterator,getQueue()){
             tmp = container_of(iterator, pcb_t, p_next);
-            tmp->priority ++;
+            if (tmp->priority != 0) tmp->priority++;
+            if (first_priority == 0) first_priority = tmp->priority;
         }
         current->priority = current->original_priority;
-        insertProcQ(getQueue(), current);
-        current = removeProcQ(getQueue());
+        if (current->priority < first_priority){
+            insertProcQ(getQueue(), current);
+            current = removeProcQ(getQueue());
+        }
         timer_on = 1;
         setTIMER(TIME_SLICE);
     }

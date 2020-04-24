@@ -47,26 +47,42 @@
 #define SYSBK_OLDAREA   (EXCV_BASE + (6 * STATE_T_SIZE))
 #define SYSBK_NEWAREA   (EXCV_BASE + (7 * STATE_T_SIZE))
 
-// Funzioni esterne
-extern void print(char *str);
-
 // Ridefinizioni per architettura uMPS
 #define CAUSE_IP_GET(cause,line) (cause & CAUSE_IP_MASK) & CAUSE_IP(line)
 
 #define BUS_TODLOW  0x1000001c
 #define getTODLO() (*((unsigned int *)BUS_TODLOW))
 
+#define TIMER_USED IL_CPUTIMER
+
+#define FIRST_ADDR_TERMINAL 0x10000250
+#define FIRST_ADDR_PRINTER  0x100001D0
+#define FIRST_ADDR_UNUSED   0x10000150
+#define FIRST_ADDR_TAPE     0x100000D0
+#define FIRST_ADDR_DISK     0x10000050
+
 #elif defined(TARGET_UARM)
 #include "uarm/libuarm.h"
 #include "uarm/arch.h"
 #include "uarm/uARMtypes.h"
+
+#define FIRST_ADDR_TERMINAL 0x240
+#define FIRST_ADDR_PRINTER  0x1C0
+#define FIRST_ADDR_UNUSED   0x140
+#define FIRST_ADDR_TAPE     0xC0
+#define FIRST_ADDR_DISK     0x40
+
+#define TIMER_USED IL_TIMER
 #endif
 
-// Priorità dei processi
-#define FIRST_PRIORITY  1
+// Funzioni esterne
+extern void print(char *str);
 
 // Tempo dedicato ad ogni processo
 #define TIME_SLICE 3000
+
+// Device complessivi (ogni terminale ha due sottodevice)
+#define MAX_DEV (DEV_PER_INT * (DEV_USED_INTS + 1))
 
 // Codici per handler alternativi
 #define SYSBK_TYPE  0
@@ -79,6 +95,12 @@ unsigned int timer_on;
 // Mappa degli indirizzi dei processi attivi
 unsigned proc_map[MAXPROC + 1];
 
+// Semafori dei devices
+unsigned dev_sem[MAX_DEV];
+
+// Status in attesa di essere cominicato alla WAITIO
+unsigned dev_response[MAX_DEV];
+
 unsigned last_user_switch,last_kernel_switch;
 
 // Processo attivo
@@ -86,6 +108,7 @@ pcb_t *current;
 
 // Funzione di debug
 void breakpoint();
+void idle();
 
 // Ritorna la coda dei processi attivi
 struct list_head* getQueue();

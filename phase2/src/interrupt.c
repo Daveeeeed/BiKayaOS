@@ -62,17 +62,17 @@ void intHandler(){
     cause = old_state->CP15_Cause;
     #endif
     copyState(old_state, &current->p_s);
-    if(CAUSE_IP_GET(cause, IL_TIMER)){
+    if(CAUSE_IP_GET(cause, TIMER_USED)){
         timer_on = 0;
-    } else if(CAUSE_IP_GET(cause, IL_DISK)){
+    } else if(CAUSE_IP_GET(cause, INT_DISK)){
         diskHandler();
-    } else if(CAUSE_IP_GET(cause, IL_TAPE)){
+    } else if(CAUSE_IP_GET(cause, INT_TAPE)){
         tapeHandler();
-    } else if(CAUSE_IP_GET(cause, IL_ETHERNET)){
+    } else if(CAUSE_IP_GET(cause, INT_UNUSED)){
         networkHandler();
-    } else if(CAUSE_IP_GET(cause, IL_PRINTER)){
+    } else if(CAUSE_IP_GET(cause, INT_PRINTER)){
         printerHandler();
-    } else if(CAUSE_IP_GET(cause, IL_TERMINAL)){
+    } else if(CAUSE_IP_GET(cause, INT_TERMINAL)){
         terminalHandler();
     } else{
         print("Raised unknown interrupt\n");

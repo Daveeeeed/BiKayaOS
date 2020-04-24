@@ -23,8 +23,14 @@ int main(){
 
     current = NULL;
 
+    for (int i = 0; i < MAX_DEV; i++){
+        dev_response[i] = 0;
+        dev_sem[i] = 0;
+    }
+
     // Istanzia i 3 processi di test nei pcb
-    initProcess((memaddr) test, FIRST_PRIORITY);
+    initProcess((memaddr) test, DEFAULT_PRIORITY);
+    initProcess((memaddr) idle, 0);
 
     // Avvia gestione processi
     scheduler();
