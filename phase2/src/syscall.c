@@ -9,46 +9,42 @@ void sysHandler(){
     last_kernel_switch = getTODLO();
 
     state_t *old_state = (state_t*) SYSBK_OLDAREA;
-    unsigned arg0,arg1,arg2,arg3,return_v;
+
     #ifdef TARGET_UMPS
-    arg0 = old_state->reg_a0;
-    arg1 = old_state->reg_a1;
-    arg2 = old_state->reg_a2;
-    arg3 = old_state->reg_a3;
-    return_v = old_state->reg_v0;
     old_state->pc_epc = old_state->pc_epc + 4;
-    #elif defined(TARGET_UARM)
-    arg0 = old_state->a1;
-    arg1 = old_state->a2;
-    arg2 = old_state->a3;
-    arg3 = old_state->a4;
-    return_v = old_state->a1;
     #endif
+
     copyState(old_state, &current->p_s);
-    switch(arg0){
+
+    unsigned arg1 = old_state->ARG1;
+    unsigned arg2 = old_state->ARG2;
+    unsigned arg3 = old_state->ARG3;
+    unsigned arg4 = old_state->ARG4;
+
+    switch(arg1){
         case GETCPUTIME:
-            getCpuTime((unsigned*) arg1, (unsigned*) arg2, (unsigned*) arg3);
+            getCpuTime((unsigned*) arg2, (unsigned*) arg3, (unsigned*) arg4);
             break;
         case CREATEPROCESS:
-            return_v = createProcess((state_t*) arg1, (int) arg2, (void**) arg3);
+            createProcess((state_t*) arg2, (int) arg3, (void**) arg4);
             break;
         case TERMINATEPROCESS:
-            return_v = terminateProcess((void*) arg1);
+            terminateProcess((void*) arg2);
             break;
         case VERHOGEN:
-            verhogen((int*) arg1);
+            verhogen((int*) arg2);
             break;
         case PASSEREN:
-            passeren((int*) arg1);
+            passeren((int*) arg2);
             break;
         case WAITIO:
-            return_v = waitIO(arg1, (unsigned*) arg2, (int) arg3);
+            waitIO(arg2, (unsigned*) arg3, (int) arg4);
             break;
         case SPECPASSUP:
-            return_v = specPassup((int) arg1, (state_t*) arg2, (state_t*) arg3);
+            specPassup((int) arg2, (state_t*) arg3, (state_t*) arg4);
             break;
         case GETPID:
-            getPid((void**) arg1, (void**) arg2);
+            getPid((void**) arg2, (void**) arg3);
             break;
         default:
             specHandler(SYSBK_TYPE);
@@ -69,9 +65,13 @@ void getCpuTime(unsigned int *user, unsigned int *kernel, unsigned int *wallcloc
     if (kernel != NULL) kernel = &(current->kernel_time);
 }
 
-int createProcess(state_t *statep, int priority, void **cpid){
+void createProcess(state_t *statep, int priority, void **cpid){
     struct pcb_t *proc_blk;
-    if((proc_blk = allocPcb()) == NULL || statep == NULL) return -1;
+    if((proc_blk = allocPcb()) == NULL || statep == NULL){
+        // TODO
+        if (current != NULL) current->p_s.RET_VAL = -1;
+        return;
+    }
     copyState(statep, &proc_blk->p_s);
     // Imposta le priorità
     proc_blk->priority = priority;
@@ -91,10 +91,12 @@ int createProcess(state_t *statep, int priority, void **cpid){
     // inserisce il processo come figlio del corrente
     insertChild(current, proc_blk);
     if (cpid != NULL) *cpid = proc_blk;
-    return 0;
+    // TODO
+    if (current != NULL) current->p_s.RET_VAL = 0;
+    return;
 }
 
-int terminateProcess(void *pid){
+void terminateProcess(void *pid){
     int i = 1;
     if (pid == NULL) pid = current;
     while(i <= proc_map[0]){
@@ -102,11 +104,15 @@ int terminateProcess(void *pid){
             outChildBlocked(pid);
             freeChildren(pid);
             if (pid == current) current = NULL;
-            return 0;
+            // TODO
+            if (current != NULL) current->p_s.RET_VAL = 0;
+            return;
         }
         i++;
     }
-    return -1;
+    // TODO
+    if (current != NULL) current->p_s.RET_VAL = -1;
+    return;
 }
 
 void verhogen(int *semaddr){
@@ -117,6 +123,7 @@ void verhogen(int *semaddr){
         tmp = removeBlocked(semaddr);
         insertProcQ(getQueue(), tmp);
     }
+    return;
 }
 
 void passeren(int *semaddr){
@@ -125,33 +132,11 @@ void passeren(int *semaddr){
         insertBlocked(semaddr, current);
         current = NULL;
     }
+
+    return;
 }
 
-unsigned deviceIndex(unsigned *reg, int subdevice){
-    unsigned dev_line,dev_pos,address;
-    address = (unsigned)reg;
-    if (address >= FIRST_ADDR_TERMINAL){
-        address -= FIRST_ADDR_TERMINAL;
-        if (subdevice) dev_line = INT_TERMINAL;
-        else dev_line = INT_TERMINAL + 1;
-    } else if (address >= FIRST_ADDR_PRINTER){
-        address -= FIRST_ADDR_PRINTER;
-        dev_line = INT_PRINTER;
-    } else if (address >= FIRST_ADDR_UNUSED){
-        address -= FIRST_ADDR_UNUSED;
-        dev_line = INT_UNUSED;
-    } else if (address >= FIRST_ADDR_TAPE){
-        address -= FIRST_ADDR_TAPE;
-        dev_line = INT_TAPE;
-    } else if (address >= FIRST_ADDR_DISK){
-        address -= FIRST_ADDR_DISK;
-        dev_line = INT_DISK;
-    }
-    dev_pos = address/10;
-    return (dev_line - 3) * 8 + dev_pos;
-}
-
-int waitIO(unsigned int command, unsigned int *reg, int subdevice){
+void waitIO(unsigned int command, unsigned int *reg, int subdevice){
     // ottengo il registro del comando del device
     unsigned *cmd_reg = reg + 3 - 2 * subdevice;
     // attivo il comando
@@ -163,13 +148,14 @@ int waitIO(unsigned int command, unsigned int *reg, int subdevice){
         passeren(&dev_sem[i]);
     // se c'è una risposta pronta per essere trasmessa la ritorno
     } else {
-        unsigned tmp = dev_response[i];
+        // TODO
+        if (current != NULL) current->p_s.RET_VAL = dev_response[i];
         dev_response[i] = 0;
-        return tmp;
     }
+    return;
 }
 
-int specPassup(int type, state_t *old_st, state_t *new_st){
+void specPassup(int type, state_t *old_st, state_t *new_st){
     switch (type) {
     case SYSBK_TYPE:
         if(current->new_sysbk != NULL){
@@ -177,7 +163,9 @@ int specPassup(int type, state_t *old_st, state_t *new_st){
             current->old_sysbk = old_st;
         } else {
             terminateProcess(NULL);
-            return -1;
+            // TODO
+            if (current != NULL) current->p_s.RET_VAL = -1;
+            return;
         }
         break;
     case TLB_TYPE:
@@ -186,7 +174,9 @@ int specPassup(int type, state_t *old_st, state_t *new_st){
             current->old_tlb = old_st;
         } else {
             terminateProcess(NULL);
-            return -1;
+            // TODO
+            if (current != NULL) current->p_s.RET_VAL = -1;
+            return;
         }
         break;
     case TRAP_TYPE:
@@ -195,17 +185,24 @@ int specPassup(int type, state_t *old_st, state_t *new_st){
             current->old_trap = old_st;
         } else {
             terminateProcess(NULL);
-            return -1;
+            // TODO
+            if (current != NULL) current->p_s.RET_VAL = -1;
+            return;
         }
         break;
     default:
         terminateProcess(NULL);
-        break;
+        // TODO
+        if (current != NULL) current->p_s.RET_VAL = -1;
+        return;
     }
-    return 0;
+    // TODO
+    if (current != NULL) current->p_s.RET_VAL = 0;
+    return;
 }
 
 void getPid(void **pid, void **ppid){
     if (pid != NULL) *pid = current;
     if (ppid != NULL) *ppid = current->p_parent;
+    return;
 }

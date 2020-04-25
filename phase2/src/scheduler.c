@@ -32,6 +32,7 @@ void scheduler(){
         current->kernel_time = current->kernel_time + (getTODLO() - last_kernel_switch);
     }
     // Switch da kernel mode a user mode
+    
     last_user_switch = getTODLO();
     LDST(&current->p_s);
 }

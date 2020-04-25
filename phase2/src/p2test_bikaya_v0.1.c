@@ -21,6 +21,10 @@
  */
 
 extern void breakpoint();
+extern void breakpoint1();
+extern void breakpoint2();
+extern void breakpoint3();
+extern void breakpoint4();
 
 #ifdef TARGET_UMPS
 #include "umps/libumps.h"
@@ -159,7 +163,7 @@ void print(char *msg) {
     char *       s    = msg;
     devregtr *   base = (devregtr *)DEV_REG_ADDR(IL_TERMINAL, 0);     // (devregtr *)(TERM0ADDR);
     devregtr     status;
-
+    
     SYSCALL(PASSEREN, (int)&term_mut, 0, 0); /* get term_mut lock */
 
     while (*s != '\0') {
@@ -169,14 +173,17 @@ void print(char *msg) {
 
         /* Wait for I/O completion (SYS8) */
         status = SYSCALL(WAITIO, command, (int)base, FALSE);
-
+        
         /*		PANIC(); */
 
-        if ((status & TERMSTATMASK) != TRANSM)
+        if ((status & TERMSTATMASK) != TRANSM){
             PANIC();
+        }
+            
 
-        if (((status & TERMCHARMASK) >> BYTELEN) != *s)
+        if (((status & TERMCHARMASK) >> BYTELEN) != *s){
             PANIC();
+        }
 
         s++;
     }
@@ -189,7 +196,7 @@ void print(char *msg) {
 /*                 p1 -- the root process                            */
 /*                                                                   */
 void test() {
-    
+
     SYSCALL(VERHOGEN, (int)&testsem, 0, 0); /* V(testsem)   */
 
     if (testsem != 1) {

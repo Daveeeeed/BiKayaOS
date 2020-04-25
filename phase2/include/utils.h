@@ -53,13 +53,19 @@
 #define BUS_TODLOW  0x1000001c
 #define getTODLO() (*((unsigned int *)BUS_TODLOW))
 
-#define TIMER_USED IL_CPUTIMER
-
 #define FIRST_ADDR_TERMINAL 0x10000250
 #define FIRST_ADDR_PRINTER  0x100001D0
 #define FIRST_ADDR_UNUSED   0x10000150
 #define FIRST_ADDR_TAPE     0x100000D0
 #define FIRST_ADDR_DISK     0x10000050
+
+#define TIMER_USED IL_CPUTIMER
+
+#define ARG1        reg_a0
+#define ARG2        reg_a1
+#define ARG3        reg_a2
+#define ARG4        reg_a3
+#define RET_VAL     reg_v0
 
 #elif defined(TARGET_UARM)
 #include "uarm/libuarm.h"
@@ -72,7 +78,14 @@
 #define FIRST_ADDR_TAPE     0xC0
 #define FIRST_ADDR_DISK     0x40
 
-#define TIMER_USED IL_TIMER
+#define TIMER_USED  IL_TIMER
+
+#define ARG1        a1
+#define ARG2        a2
+#define ARG3        a3
+#define ARG4        a4
+#define RET_VAL     a1
+
 #endif
 
 // Funzioni esterne
@@ -96,10 +109,10 @@ unsigned int timer_on;
 unsigned proc_map[MAXPROC + 1];
 
 // Semafori dei devices
-unsigned dev_sem[MAX_DEV];
+int dev_sem[MAX_DEV];
 
 // Status in attesa di essere cominicato alla WAITIO
-unsigned dev_response[MAX_DEV];
+int dev_response[MAX_DEV];
 
 unsigned last_user_switch,last_kernel_switch;
 
@@ -121,5 +134,14 @@ void initProcess(memaddr entry_point, unsigned priority);
 
 // Copia lo stato di src dentro dest
 void copyState(state_t* src, state_t* dest);
+
+unsigned deviceIndex(unsigned *reg, int subdevice);
+
+void breakpoint1();
+void breakpoint2();
+void breakpoint3();
+void breakpoint4();
+void breakpoint5();
+void breakpoint6();
 
 #endif

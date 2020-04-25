@@ -1,6 +1,7 @@
 #include "interrupt.h"
 #include "utils.h"
 #include "scheduler.h"
+#include "syscall.h"
 
 // TODO: da scrivere per uARM e uMPS
 void diskHandler(){
@@ -26,17 +27,31 @@ void printerHandler(){
 // TODO: su uMPS non possono essere gestiti causa termprint
 // modificare termprint o mascherare gestione interrupt terminale
 void terminalHandler(){
-    memaddr* interrupt_bitmap = (memaddr*) CDEV_BITMAP_ADDR(IL_TERMINAL);
-    int device_nr = getDeviceNr(*interrupt_bitmap);
-    if (device_nr < 0) PANIC();
-    termreg_t* term = (termreg_t*) DEV_REG_ADDR(IL_TERMINAL, device_nr);
+    int i, status, device_nr;
+    termreg_t* term;
+    memaddr* interrupt_bitmap = (memaddr*) CDEV_BITMAP_ADDR(INT_TERMINAL);
+
+    if ((device_nr = getDeviceNr(*interrupt_bitmap)) < 0) PANIC();
+    else term = (termreg_t*) DEV_REG_ADDR(INT_TERMINAL, device_nr);
+
     if ((term->recv_status & TERM_STATUS_MASK) == ST_TRANS_RECV){
+        i = DEV_PER_INT * (INT_TERMINAL - 3) + device_nr;
+        status = term->recv_status;
         term->recv_command = CMD_ACK;
     }
-    if ((term->transm_status & TERM_STATUS_MASK) == ST_TRANS_RECV){
+    else if ((term->transm_status & TERM_STATUS_MASK) == ST_TRANS_RECV){
+        i = DEV_PER_INT * (INT_TERMINAL - 3 + 1) + device_nr;
+        status = term->transm_status;
         term->transm_command = CMD_ACK;
     }
-    return;
+
+    if(dev_sem[i] < 0){
+        verhogen(&dev_sem[i]);
+        current->p_s.RET_VAL = status;
+        dev_response[i] = 0;
+    } else {
+        dev_response[i] = status;
+    }
 }
 
 int getDeviceNr(unsigned bitmap){
