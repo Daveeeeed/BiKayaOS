@@ -37,18 +37,20 @@ typedef struct pcb_t {
     /* key of the semaphore on which the process is eventually blocked */
     int *p_semkey;
 
-    /* utilities clock */
-    unsigned start_time; /* tempo della prima attivazione */
-    unsigned user_time; /* tempo trascorso in user mode */
-    unsigned kernel_time; /* tempo trascorso in kernel mode */
+    /* utility times */
+    // #0 start_time,tempo della prima attivazione
+    // #1 user_time, tempo trascorso in user mode
+    // #2 kernel_time, tempo trascorso in kernel mode
+    unsigned time[3];
 
     /* alternative handler states */
-    state_t* old_sysbk;
-    state_t* new_sysbk;
-    state_t* old_tlb;
-    state_t* new_tlb;
-    state_t* old_trap;
-    state_t* new_trap;
+    // #0 new_sysbk;
+    // #1 old_sysbk;
+    // #2 new_tlb;
+    // #3 old_tlb;
+    // #4 new_trap;
+    // #5 old_trap;
+    state_t* proc_area[6];
 
 } pcb_t;
 

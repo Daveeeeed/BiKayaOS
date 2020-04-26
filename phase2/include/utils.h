@@ -102,6 +102,17 @@ extern void print(char *str);
 #define TLB_TYPE    1
 #define TRAP_TYPE   2
 
+// Time e aree del PCB
+#define STARTTIME   0
+#define USERTIME    1
+#define KERNELTIME  2
+#define NEWSYSBK    0
+#define OLDSYSBK    1
+#define NEWTLB      2
+#define OLDTLB      3
+#define NEWTRAP     4
+#define OLDTRAP     5
+
 // Bool timer attivato
 unsigned int timer_on;
 

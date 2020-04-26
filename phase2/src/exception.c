@@ -5,48 +5,50 @@
 
 void trapHandler(){
     // TIME CONTROLLER
-    current->user_time = current->user_time + (getTODLO() - last_user_switch);
-    last_kernel_switch = getTODLO();
-    specHandler(TRAP_TYPE);
+    if (current != NULL){
+        current->time[USERTIME] = current->time[USERTIME] + (getTODLO() - last_user_switch);
+        last_kernel_switch = getTODLO();
+        specialHandler(TRAP_TYPE);
+    }
 }
 
 void tlbHandler(){
     // TIME CONTROLLER
-    current->user_time = current->user_time + (getTODLO() - last_user_switch);
-    last_kernel_switch = getTODLO();
-    specHandler(TLB_TYPE);
+    if (current != NULL){
+        current->time[USERTIME] = current->time[USERTIME] + (getTODLO() - last_user_switch);
+        last_kernel_switch = getTODLO();
+        specialHandler(TLB_TYPE);
+    }
 }
 
-void specHandler(unsigned type){
-    if (current != NULL){
+void specialHandler(unsigned type){
+    int i = type * 2;
+    state_t *old_state;
+    // se type è nel range e se la new_area è popolata
+    if (type >= 0 && type < 3 && current->proc_area[i] != NULL){
+        // ottengo l'old_area
         switch (type){
         case SYSBK_TYPE:
-            if (current->new_sysbk != NULL){
-                STST(&current->old_sysbk);
-                LDST(&current->new_sysbk);
-            } else {
-                terminateProcess(NULL);
-            }
+            old_state = (state_t*) SYSBK_OLDAREA;
+            #ifdef TARGET_UMPS
+            old_state->pc_epc = old_state->pc_epc + 4;
+            #endif
             break;
         case TLB_TYPE:
-            if (current->new_tlb != NULL){
-                STST(&current->old_tlb);
-                LDST(&current->new_tlb);
-            } else {
-                terminateProcess(NULL);
-            }
+            old_state = (state_t*) TLB_OLDAREA;
             break;
         case TRAP_TYPE:
-            if (current->new_trap != NULL){
-                STST(&current->old_trap);
-                LDST(&current->new_trap);
-            } else {
-                terminateProcess(NULL);
-            }
+            old_state = (state_t*) PGMTRAP_OLDAREA;
             break;
         default:
             terminateProcess(NULL);
+            scheduler();
+            break;
         }
+        copyState(old_state, current->proc_area[i + 1]);
+        LDST(current->proc_area[i]);
+    } else {
+        terminateProcess(NULL);
+        scheduler();
     }
-    scheduler();
 }

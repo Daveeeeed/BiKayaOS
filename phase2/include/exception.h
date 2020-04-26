@@ -6,6 +6,6 @@ void trapHandler();
 void tlbHandler();
 
 // Gestore eccezioni speciali
-void specHandler(unsigned type);
+void specialHandler(unsigned type);
 
 #endif

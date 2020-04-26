@@ -29,7 +29,7 @@ pcb_t *allocPcb(void){
     list_del(pcb_free.next);
     deleted->p_parent = NULL;
     deleted->p_semkey = NULL;
-    deleted->priority = 0;
+    deleted->original_priority = 0;
     return deleted;
 }
 

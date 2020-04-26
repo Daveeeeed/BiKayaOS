@@ -46,8 +46,9 @@ void terminalHandler(){
     }
 
     if(dev_sem[i] < 0){
+        pcb_t *free = headBlocked(&dev_sem[i]);
         verhogen(&dev_sem[i]);
-        current->p_s.RET_VAL = status;
+        free->p_s.RET_VAL = status;
         dev_response[i] = 0;
     } else {
         dev_response[i] = status;
@@ -65,16 +66,18 @@ int getDeviceNr(unsigned bitmap){
 
 void intHandler(){
     // TIME CONTROLLER
-    current->user_time = current->user_time + (getTODLO() - last_user_switch);
+    current->time[USERTIME] = current->time[USERTIME] + (getTODLO() - last_user_switch);
     last_kernel_switch = getTODLO();
 
     unsigned cause;
     state_t* old_state = (state_t*) INT_OLDAREA;
+
     #ifdef TARGET_UMPS
     cause = old_state->cause;
     #elif defined(TARGET_UARM)
     old_state->pc = old_state->pc - 4;
     cause = old_state->CP15_Cause;
+    
     #endif
     copyState(old_state, &current->p_s);
     if(CAUSE_IP_GET(cause, TIMER_USED)){

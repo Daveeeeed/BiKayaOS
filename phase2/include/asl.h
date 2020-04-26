@@ -22,7 +22,7 @@ int insertBlocked(int *key, struct pcb_t *p);
 // Ritorna e rimuove dalla coda dei processi
 // del semaforo che ha come chiave key il primo
 // elemento. Se dopo la rimozione la lista diventa
-// nuova, rimuove il SEMD rendendolo nuovamente un 
+// vuota, rimuove il SEMD rendendolo nuovamente un 
 // semaforo libero e inutilizzato
 pcb_t* removeBlocked(int *key);
 

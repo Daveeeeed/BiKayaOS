@@ -15,14 +15,13 @@ int main(){
     initNewArea((memaddr) TLB_NEWAREA, (memaddr) tlbHandler);
     initNewArea((memaddr) INT_NEWAREA, (memaddr) intHandler);
 
-    proc_map[0] = 0;
-
     // Inizializza la pcb free
     initPcbs();
     initASL();
 
     current = NULL;
-
+    proc_map[0] = 0;
+    
     for (int i = 0; i < MAX_DEV; i++){
         dev_response[i] = 0;
         dev_sem[i] = 0;

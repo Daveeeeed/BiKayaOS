@@ -26,13 +26,13 @@ void scheduler(){
         setTIMER(TIME_SLICE);
     }
     // TIME CONTROLLER
-    if (current->start_time == 0){
-        current->start_time = getTODLO();
+    if (current->time[STARTTIME] == 0){
+        current->time[STARTTIME] = getTODLO();
     } else {
-        current->kernel_time = current->kernel_time + (getTODLO() - last_kernel_switch);
+        current->time[KERNELTIME] = current->time[KERNELTIME] + (getTODLO() - last_kernel_switch);
     }
     // Switch da kernel mode a user mode
-    
+
     last_user_switch = getTODLO();
     LDST(&current->p_s);
 }
