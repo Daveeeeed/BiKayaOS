@@ -123,3 +123,7 @@ void outChildBlocked(pcb_t *p){
         outBlocked(p);
     }
 }
+
+struct list_head getSemdFree(){
+    return semd_free;
+}

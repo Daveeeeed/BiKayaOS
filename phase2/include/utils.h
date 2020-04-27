@@ -116,9 +116,6 @@ extern void print(char *str);
 // Bool timer attivato
 unsigned int timer_on;
 
-// Mappa degli indirizzi dei processi attivi
-unsigned proc_map[MAXPROC + 1];
-
 // Semafori dei devices
 int dev_sem[MAX_DEV];
 

@@ -4,9 +4,16 @@
 // Coda dei processi attivi
 LIST_HEAD(ready_queue);
 
+LIST_HEAD(active);
+
 struct list_head* getQueue(){
     return &ready_queue;
 }
+
+struct list_head* getActive(){
+    return &active;
+}
+
 
 void breakpoint(){
 }

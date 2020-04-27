@@ -74,12 +74,11 @@ void createProcess(state_t *statep, int priority, void **cpid){
         return;
     }
     copyState(statep, &proc_blk->p_s);
+    // Inserisce nella lista dei processi attivi
+    list_add(&proc_blk->p_next, getActive());
     // Imposta le priorità
     proc_blk->priority = priority;
     proc_blk->original_priority = priority;
-    // Inserisce l'indirizzo del processo nella mappa dei processi attivi
-    proc_map[0]++;
-    proc_map[proc_map[0]] = (unsigned) proc_blk;
     // Imposta i timer e le old/new area
     for(int i = 0; i < 3; i++) proc_blk->time[i] = 0;
     for(int i = 0; i < 6; i++) proc_blk->proc_area[i] = NULL;
@@ -94,7 +93,6 @@ void createProcess(state_t *statep, int priority, void **cpid){
 }
 
 void terminateProcess(void *pid){
-    int i = 1;
     if (pid == NULL) pid = current;
     while(i <= proc_map[0]){
         if ((unsigned) pid == proc_map[i]){
@@ -114,9 +112,8 @@ void terminateProcess(void *pid){
 
 void verhogen(int *semaddr){
     (*semaddr)++;
-    struct pcb_t* tmp = headBlocked(semaddr);
-    if(*semaddr >= 0 && tmp != NULL){
-        tmp = removeBlocked(semaddr);
+    if(*semaddr <= 0){
+        struct pcb_t* tmp = removeBlocked(semaddr);
         insertProcQ(getQueue(), tmp);
     }
     return;
