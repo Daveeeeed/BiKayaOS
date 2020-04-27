@@ -119,6 +119,9 @@ unsigned int timer_on;
 // Semafori dei devices
 int dev_sem[MAX_DEV];
 
+// Mappa degli indirizzi dei processi attivi
+unsigned proc_map[MAXPROC + 1];
+
 // Status in attesa di essere cominicato alla WAITIO
 int dev_response[MAX_DEV];
 

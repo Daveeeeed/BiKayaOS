@@ -70,6 +70,7 @@ pcb_t* removeBlocked(int *key){
     semd_target = getSemd(key);
     if (semd_target != NULL){
         pcb_target = removeProcQ(&(semd_target->s_procQ));
+        pcb_target->p_semkey = NULL;
         if(list_empty(&(semd_target->s_procQ))){
                 list_del(&semd_target->s_next);
                 list_add_tail(&(semd_target->s_next), &semd_free);

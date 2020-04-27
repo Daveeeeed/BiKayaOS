@@ -45,5 +45,7 @@ pcb_t* headBlocked(int *key);
 // dell’albero radicato in p dalle eventuali code dei
 // semafori su cui sono bloccati.
 void outChildBlocked(pcb_t *p);
+
 struct list_head getSemdFree();
+
 #endif

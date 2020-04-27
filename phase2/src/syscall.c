@@ -74,8 +74,9 @@ void createProcess(state_t *statep, int priority, void **cpid){
         return;
     }
     copyState(statep, &proc_blk->p_s);
-    // Inserisce nella lista dei processi attivi
-    list_add(&proc_blk->p_next, getActive());
+    // Inserisce l'indirizzo del processo nella mappa dei processi attivi
+    proc_map[0]++;
+    proc_map[proc_map[0]] = (unsigned) proc_blk;
     // Imposta le priorità
     proc_blk->priority = priority;
     proc_blk->original_priority = priority;
@@ -93,6 +94,7 @@ void createProcess(state_t *statep, int priority, void **cpid){
 }
 
 void terminateProcess(void *pid){
+    int i = 1;
     if (pid == NULL) pid = current;
     while(i <= proc_map[0]){
         if ((unsigned) pid == proc_map[i]){
