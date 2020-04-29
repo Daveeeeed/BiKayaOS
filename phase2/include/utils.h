@@ -88,14 +88,11 @@
 
 #endif
 
-// Funzioni esterne
-extern void print(char *str);
-
 // Tempo dedicato ad ogni processo
 #define TIME_SLICE 3000
 
 // Device complessivi (ogni terminale ha due sottodevice)
-#define MAX_DEV (DEV_PER_INT * (DEV_USED_INTS + 1))
+#define MAXDEV (DEV_PER_INT * (DEV_USED_INTS + 1))
 
 // Codici per handler alternativi
 #define SYSBK_TYPE  0
@@ -116,22 +113,22 @@ extern void print(char *str);
 // Bool timer attivato
 unsigned int timer_on;
 
-// Semafori dei devices
-int dev_sem[MAX_DEV];
+// Tempo dell'ultimo mode switch (kernel to user, user to kernel)
+unsigned last_user_switch,last_kernel_switch;
 
-// Mappa degli indirizzi dei processi attivi
-unsigned proc_map[MAXPROC + 1];
+// Semafori dei devices
+int dev_sem[MAXDEV];
 
 // Status in attesa di essere cominicato alla WAITIO
-int dev_response[MAX_DEV];
+int dev_response[MAXDEV];
 
-unsigned last_user_switch,last_kernel_switch;
+// Mappa degli indirizzi dei processi attivi
+unsigned proc_map[MAXPROC+1];
 
 // Processo attivo
 pcb_t *current;
 
-// Funzione di debug
-void breakpoint();
+// Processo Idle
 void idle();
 
 // Ritorna la coda dei processi attivi
@@ -146,8 +143,11 @@ void initProcess(memaddr entry_point, unsigned priority);
 // Copia lo stato di src dentro dest
 void copyState(state_t* src, state_t* dest);
 
+// Ritorna l'indice dell'array dev_response e dev_sem corrispondente al device all'indirizzo reg
 unsigned deviceIndex(unsigned *reg, int subdevice);
 
+// Funzioni di debug
+void breakpoint();
 void breakpoint1();
 void breakpoint2();
 void breakpoint3();

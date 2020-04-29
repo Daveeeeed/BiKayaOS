@@ -21,9 +21,13 @@ int main(){
 
     current = NULL;
     
-    for (int i = 0; i < MAX_DEV; i++){
+    for (int i = 0; i < MAXDEV; i++){
         dev_response[i] = 0;
         dev_sem[i] = 0;
+    }
+
+    for (int i = 0; i <= MAXPROC; i++){
+        proc_map[i] = 0;
     }
 
     // Istanzia i 3 processi di test nei pcb

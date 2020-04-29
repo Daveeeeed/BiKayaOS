@@ -20,14 +20,6 @@
  *      Modified by Mattia Maldini, Renzo Davoli 2020
  */
 
-extern void breakpoint();
-extern void breakpoint1();
-extern void breakpoint2();
-extern void breakpoint3();
-extern void breakpoint4();
-extern void breakpoint5();
-extern void breakpoint6();
-
 #ifdef TARGET_UMPS
 #include "umps/libumps.h"
 #include "umps/arch.h"
@@ -70,7 +62,6 @@ extern void breakpoint6();
 
 #include "const_bikaya.h"
 #include "types_bikaya.h"
-#include "utils.h"
 
 typedef unsigned int devregtr;
 typedef unsigned int cpu_t;
@@ -159,13 +150,13 @@ unsigned int set_sp_pc_status(state_t *s, state_t *copy, unsigned int pc) {
 #endif
 }
 
+
 /* a procedure to print on terminal 0 */
 void print(char *msg) {
     unsigned int command;
-    unsigned status;
-    char *s = msg;
+    char *       s    = msg;
     devregtr *   base = (devregtr *)DEV_REG_ADDR(IL_TERMINAL, 0);     // (devregtr *)(TERM0ADDR);
-    
+    devregtr     status;
 
     SYSCALL(PASSEREN, (int)&term_mut, 0, 0); /* get term_mut lock */
 
@@ -173,16 +164,18 @@ void print(char *msg) {
         /* Put "transmit char" command+char in term0 register (3rd word). This
                  actually starts the operation on the device! */
         command = PRINTCHR | (((devregtr)*s) << BYTELEN);
+
         /* Wait for I/O completion (SYS8) */
         status = SYSCALL(WAITIO, command, (int)base, FALSE);
 
         /*		PANIC(); */
-        if ((status & TERMSTATMASK) != TRANSM){
+
+        if ((status & TERMSTATMASK) != TRANSM)
             PANIC();
-        }
-        if (((status & TERMCHARMASK) >> BYTELEN) != *s){
+
+        if (((status & TERMCHARMASK) >> BYTELEN) != *s)
             PANIC();
-        }
+
         s++;
     }
 
@@ -338,7 +331,6 @@ void p2() {
     SYSCALL(GETCPUTIME, (int)&user_t2, (int)&kernel_t2, (int)&wallclock_t2); /* CPU time used */
     now2 = getTODLO();                                                       /* time of day  */
 
-    /*
     if (((user_t2 - user_t1) >= (kernel_t2 - kernel_t1)) && ((wallclock_t2 - wallclock_t1) >= (user_t2 - user_t1)) &&
         ((now2 - now1) >= (wallclock_t2 - wallclock_t1)) && ((user_t2 - user_t1) >= MINLOOPTIME)) {
         print("p2 (semaphores and time check) is OK\n");
@@ -353,7 +345,6 @@ void p2() {
             print("error: not enough cpu time went by\n");
         print("p2 blew it!\n");
     }
-    */
 
     p1p2synch = 1; /* p1 will check this */
 
@@ -506,6 +497,7 @@ void p4() {
 
 void p4a() {
     unsigned int p4Status;
+
     print("p4a - try to generate a TLB exception\n");
 
 /* generate a TLB exception by turning on VM without setting up the
@@ -524,7 +516,6 @@ void p4a() {
 /* second part of p4 - should be entered in user mode */
 void p4b() {
     print("p4b - Invoking custom system call 13\n");
-
     SYSCALL(13, 0, 0, 0);
 
     SYSCALL(VERHOGEN, (int)&endp4, 0, 0); /* V(endp4) */

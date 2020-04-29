@@ -13,7 +13,6 @@ void breakpoint(){
 
 void idle(){
     while(TRUE){
-        ;
     }
 }
 
@@ -34,6 +33,7 @@ void initNewArea(memaddr new_area, memaddr handler){
     new_state->pc = handler; /* Imposta pc all'handler */
     #endif
 }
+
 void initProcess(memaddr entry_point, unsigned priority){
     state_t p_s;
     STST(&p_s);

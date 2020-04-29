@@ -46,6 +46,4 @@ pcb_t* headBlocked(int *key);
 // semafori su cui sono bloccati.
 void outChildBlocked(pcb_t *p);
 
-struct list_head getSemdFree();
-
 #endif
