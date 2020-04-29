@@ -566,15 +566,15 @@ void p7root() {
 
     for (i = 0; i < NOLEAVES; i++)
         SYSCALL(PASSEREN, (int)&endcreate, 0, 0);
-
     print("Leaves created, now terminating...\n");
     SYSCALL(TERMINATEPROCESS, (int)leaf1pid, 0, 0);
     SYSCALL(TERMINATEPROCESS, (int)leaf2pid, 0, 0);
+    breakpoint1();
     SYSCALL(TERMINATEPROCESS, (int)leaf3pid, 0, 0);
+    breakpoint1();
     SYSCALL(TERMINATEPROCESS, (int)leaf4pid, 0, 0);
     for (i = 0; i < NOLEAVES; i++)
         SYSCALL(VERHOGEN, (int)&blkleaves, 0, 0);
-
     SYSCALL(VERHOGEN, (int)&endp7, 0, 0);
 
     SYSCALL(PASSEREN, (int)&blkp7, 0, 0);

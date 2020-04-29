@@ -106,6 +106,7 @@ void recursiveTermination(pcb_t* root){
     outChild(root);
     freePcb(root);
     proc_map[root->pid] = proc_map[proc_map[0]];
+    ((pcb_t*)proc_map[proc_map[0]])->pid = root->pid;
     proc_map[proc_map[0]] = 0;
     proc_map[0]--;
     return;
@@ -113,12 +114,14 @@ void recursiveTermination(pcb_t* root){
 
 void terminateProcess(void *pid){
     if (pid == NULL){
+        breakpoint2();
         if (current != NULL){
             pid = current;
             current = NULL;
         } else return;
     }
     if (proc_map[((pcb_t*)pid)->pid] == pid){
+        breakpoint3();
         recursiveTermination(pid);
         if (current != NULL) current->p_s.RET_VAL = 0;
     } else {
