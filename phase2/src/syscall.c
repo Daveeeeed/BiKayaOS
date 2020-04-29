@@ -60,7 +60,7 @@ void getCpuTime(unsigned int *user, unsigned int *kernel, unsigned int *wallcloc
     if (user != NULL) user = &(current->time[USERTIME]);
     if (kernel != NULL) kernel = &(current->time[KERNELTIME]);
 }
-
+int acc;
 void createProcess(state_t *statep, int priority, void **cpid){
     struct pcb_t *proc_blk;
     if((proc_blk = allocPcb()) == NULL || statep == NULL){
@@ -68,9 +68,11 @@ void createProcess(state_t *statep, int priority, void **cpid){
         if (current != NULL) current->p_s.RET_VAL = -1;
         return;
     }
+    acc = proc_blk;
     copyState(statep, &proc_blk->p_s);
     // Inserisce l'indirizzo del processo nella mappa dei processi attivi
     proc_map[0]++;
+    proc_blk->pid = proc_map[0];
     proc_map[proc_map[0]] = (unsigned) proc_blk;
     // Imposta le priorità
     proc_blk->priority = priority;
@@ -88,60 +90,40 @@ void createProcess(state_t *statep, int priority, void **cpid){
     return;
 }
 
-int pcbExist(pcb_t* pid){
-    if (pid == NULL){
-        if (current == NULL) return 0;
-        else {
-            pid = current;
-            current = NULL;
-        }
-    }
-    for (int i = 1; i <= proc_map[0]; i++){
-        if ((unsigned)pid == proc_map[i]){
-            proc_map[i] = proc_map[proc_map[0]];
-            proc_map[proc_map[0]] = 0;
-            proc_map[0]--;
-            return 1;
-        }
-    }
-    return 0;
-}
-
 void recursiveTermination(pcb_t* root){
-    if (!emptyChild(root)){     /* se ha figli richiamo la funzione su di essi */
+    if (!emptyChild(root)){
         struct list_head *iterator;
         list_for_each(iterator, &root->p_child){
             pcb_t *child = container_of(iterator, pcb_t, p_sib);
-            list_del(&child->p_sib);    /* lo distacco dai fratelli */
+            list_del(&child->p_sib);
             recursiveTermination(child);
         }
     }
-    if (root->p_semkey != NULL){    /* se è bloccato su un semoforo ne aumento di 1 il valore */
-        (*root->p_semkey)++;        /* simbolo della risorsa che rilascia quando eliminato */
+    if (root->p_semkey != NULL){
+        (*root->p_semkey)++;
         outBlocked(root);
     }
+    outChild(root);
     freePcb(root);
-    for (int i = 1; i <= proc_map[0]; i++){     /* aggiorno la mappa dei processi */
-        if ((unsigned)root == proc_map[i]){
-            proc_map[i] = proc_map[proc_map[0]];
-            proc_map[proc_map[0]] = 0;
-            proc_map[0]--;
-            return;
-        }
-    }
+    proc_map[root->pid] = proc_map[proc_map[0]];
+    proc_map[proc_map[0]] = 0;
+    proc_map[0]--;
     return;
 }
 
 void terminateProcess(void *pid){
-    // verifica l'esistenza di un pcb associato
-    if (pcbExist((pcb_t*)pid)){
-        // rimuove l'albero dei processi associato a pid
-        recursiveTermination((pcb_t*)pid);
-        if (current != NULL) current->p_s.RET_VAL = 0;
-        return;
+    if (pid == NULL){
+        if (current != NULL){
+            pid = current;
+            current = NULL;
+        } else return;
     }
-    if (current != NULL) current->p_s.RET_VAL = -1;
-    return;
+    if (proc_map[((pcb_t*)pid)->pid] == pid){
+        recursiveTermination(pid);
+        if (current != NULL) current->p_s.RET_VAL = 0;
+    } else {
+        if (current != NULL) current->p_s.RET_VAL = -1;
+    }
 }
 
 void verhogen(int *semaddr){

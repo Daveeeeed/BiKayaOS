@@ -37,6 +37,9 @@ typedef struct pcb_t {
     /* key of the semaphore on which the process is eventually blocked */
     int *p_semkey;
 
+    /* process id number */
+    int pid;
+
     /* utility times */
     // #0 start_time,tempo della prima attivazione
     // #1 user_time, tempo trascorso in user mode

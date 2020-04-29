@@ -73,7 +73,7 @@ void terminalHandler(){
     if(dev_sem[i] < 0){
         pcb_t *free = headBlocked(&dev_sem[i]);
         verhogen(&dev_sem[i]);
-        free->p_s.RET_VAL = status;
+        if (free != NULL) free->p_s.RET_VAL = status;
         dev_response[i] = 0;
     } else {
         dev_response[i] = status;

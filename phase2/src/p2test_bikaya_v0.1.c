@@ -83,6 +83,8 @@ typedef unsigned int pid_t;
 #define MINLOOPTIME 1000
 #define LOOPNUM     1000
 
+#include "utils.h"
+
 #define BADADDR 0xFFFFFFFF /* could be 0x00000000 as well */
 
 /* Software and other constants */
@@ -182,7 +184,7 @@ void print(char *msg) {
     SYSCALL(VERHOGEN, (int)&term_mut, 0, 0); /* release term_mut */
 }
 
-
+pid_t p2pid;
 /*                                                                   */
 /*                 p1 -- the root process                            */
 /*                                                                   */
@@ -228,7 +230,7 @@ void test() {
     set_sp_pc_status(&gchild4state, &gchild3state, (unsigned int)p7leaf);
 
     /* create process p2 */
-    SYSCALL(CREATEPROCESS, (int)&p2state, DEFAULT_PRIORITY, 0); /* start p2     */
+    SYSCALL(CREATEPROCESS, (int)&p2state, DEFAULT_PRIORITY, &p2pid); /* start p2     */
     print("p2 was started\n");
 
     SYSCALL(VERHOGEN, (int)&startp2, 0, 0); /* V(startp2)   */
@@ -236,23 +238,18 @@ void test() {
     /* P1 blocks until p2 finishes and Vs endp2 */
     SYSCALL(PASSEREN, (int)&endp2, 0, 0); /* P(endp2)     */
     print("p1 knows p2 ended\n");
-
     /* make sure we really blocked */
     if (p1p2synch == 0)
         print("error: p1/p2 synchronization bad\n");
 
     SYSCALL(CREATEPROCESS, (int)&p3state, DEFAULT_PRIORITY, (int)&p3pid);     //
-
+    
     SYSCALL(PASSEREN, (int)&endp3, 0, 0);
     print("p1 knows p3 ended\n");
-
     SYSCALL(CREATEPROCESS, (int)&p4state, DEFAULT_PRIORITY, 0);     // start p4
-
     SYSCALL(PASSEREN, (int)&endp4, 0, 0);
     print("p1 knows p4 ended\n");
-
     SYSCALL(CREATEPROCESS, (int)&p5state, DEFAULT_PRIORITY, 0); /* start p5		*/
-
     SYSCALL(CREATEPROCESS, (int)&p6state, DEFAULT_PRIORITY, 0); /* start p6		*/
 
     SYSCALL(VERHOGEN, (int)&blkp7, 0, 0);
@@ -349,19 +346,17 @@ void p2() {
     p1p2synch = 1; /* p1 will check this */
 
     SYSCALL(VERHOGEN, (int)&endp2, 0, 0); /* V(endp2)     */
-
     SYSCALL(TERMINATEPROCESS, 0, 0, 0); /* terminate p2 */
-
     /* just did a SYS2, so should not get to this point */
     print("error: p2 didn't terminate\n");
     PANIC(); /* PANIC! */
 }
-
+pid_t p32id;
 
 /* p3 -- termination test process and getpid test */
 void p3() {
     pid_t pid;
-    pid_t p32id;
+    
 
     switch (p3inc) {
         case 1:
@@ -413,7 +408,6 @@ void p3() {
     SYSCALL(VERHOGEN, (int)&endp3, 0, 0); /* V(endp3)          */
 
     print("p3 termination after the child\n");
-
     SYSCALL(TERMINATEPROCESS, 0, 0, 0); /* terminate p3      */
 
     /* just did a SYS2, so should not get to this point */
@@ -558,7 +552,7 @@ void p6() {
     PANIC();
 }
 
-
+pid_t gchild1,gchild2;
 /* p7root -- test of termination of subtree of processes              */
 /* create a subtree of processes, wait for the leaves to block, signal*/
 /* the root process, and then terminate                               */
@@ -567,19 +561,17 @@ void p7root() {
 
     print("p7root starts\n");
 
-    SYSCALL(CREATEPROCESS, (int)&child1state, DEFAULT_PRIORITY, 0);
-    SYSCALL(CREATEPROCESS, (int)&child2state, DEFAULT_PRIORITY, 0);
+    SYSCALL(CREATEPROCESS, (int)&child1state, DEFAULT_PRIORITY, &gchild1);
+    SYSCALL(CREATEPROCESS, (int)&child2state, DEFAULT_PRIORITY, &gchild2);
 
     for (i = 0; i < NOLEAVES; i++)
         SYSCALL(PASSEREN, (int)&endcreate, 0, 0);
 
     print("Leaves created, now terminating...\n");
-
     SYSCALL(TERMINATEPROCESS, (int)leaf1pid, 0, 0);
     SYSCALL(TERMINATEPROCESS, (int)leaf2pid, 0, 0);
     SYSCALL(TERMINATEPROCESS, (int)leaf3pid, 0, 0);
     SYSCALL(TERMINATEPROCESS, (int)leaf4pid, 0, 0);
-
     for (i = 0; i < NOLEAVES; i++)
         SYSCALL(VERHOGEN, (int)&blkleaves, 0, 0);
 

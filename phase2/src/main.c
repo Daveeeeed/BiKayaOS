@@ -33,7 +33,6 @@ int main(){
     // Istanzia i 3 processi di test nei pcb
     initProcess((memaddr) test, DEFAULT_PRIORITY);
     initProcess((memaddr) idle, 0);
-
     // Avvia gestione processi
     scheduler();
     return 0;
