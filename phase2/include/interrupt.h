@@ -8,7 +8,7 @@ int getDeviceNr(unsigned bitmap);
 void intHandler();
 
 // DTNP handler
-void dtpnHandler(int type);
+void dtpHandler(int type);
 
 // Terminal handler
 void terminalHandler();

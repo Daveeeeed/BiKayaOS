@@ -13,6 +13,7 @@ int getDeviceNr(unsigned bitmap){
 }
 
 void intHandler(){
+
     // TIME CONTROLLER
     current->time[USERTIME] = current->time[USERTIME] + (getTODLO() - last_user_switch);
     last_kernel_switch = getTODLO();
@@ -28,27 +29,36 @@ void intHandler(){
     
     #endif
     copyState(old_state, &current->p_s);
-    if(CAUSE_IP_GET(cause, TIMER_USED)){
+
+    if(CAUSE_IP_GET(cause, TIMER_USED))
         timer_on = 0;
-    } else if(CAUSE_IP_GET(cause, INT_DISK)){
-        dtpnHandler(INT_DISK);
+    else if(CAUSE_IP_GET(cause, INT_DISK)){
+        dtpHandler(INT_DISK);
     } else if(CAUSE_IP_GET(cause, INT_TAPE)){
-        dtpnHandler(INT_TAPE);
+        dtpHandler(INT_TAPE);
     } else if(CAUSE_IP_GET(cause, INT_UNUSED)){
-        dtpnHandler(INT_UNUSED);
+        dtpHandler(INT_UNUSED);
     } else if(CAUSE_IP_GET(cause, INT_PRINTER)){
-        dtpnHandler(INT_PRINTER);
+        dtpHandler(INT_PRINTER);
     } else if(CAUSE_IP_GET(cause, INT_TERMINAL)){
         terminalHandler();
-    } else{
+    } else {
         PANIC(); /* sollevato interrupt non riconosciuto */
     }
+    
+    if (current != NULL) current->time[KERNELTIME] = current->time[KERNELTIME] + (getTODLO() - last_kernel_switch);
     scheduler();
 }
 
 // TODO: da scrivere per uARM e uMPS
-void dtpnHandler(int type){
-    HALT();
+void dtpHandler(int type){
+    int i, status, device_nr;
+    dtpreg_t* dev;
+    memaddr* interrupt_bitmap = (memaddr*) CDEV_BITMAP_ADDR(type);
+
+    if ((device_nr = getDeviceNr(*interrupt_bitmap)) < 0) PANIC();
+    else dev = (dtpreg_t*) DEV_REG_ADDR(type, device_nr);
+    i = DEV_PER_INT * (type - 3) + device_nr;
 }
 
 void terminalHandler(){

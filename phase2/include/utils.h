@@ -89,7 +89,7 @@
 #endif
 
 // Tempo dedicato ad ogni processo
-#define TIME_SLICE 3000
+#define TIME_SLICE (3000 * TIME_SCALE)
 
 // Device complessivi (ogni terminale ha due sottodevice)
 #define MAXDEV (DEV_PER_INT * (DEV_USED_INTS + 1))

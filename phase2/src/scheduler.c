@@ -7,6 +7,8 @@ void scheduler(){
         current = removeProcQ(getQueue());
         timer_on = 1;
         setTIMER(TIME_SLICE);
+    } else if (current == NULL && emptyProcQ(getQueue())){
+        PANIC();
     // Se deve essere eseguito un context switch
     } else if (timer_on == 0){
         unsigned first_priority = 0;
@@ -28,8 +30,6 @@ void scheduler(){
     // TIME CONTROLLER
     if (current->time[STARTTIME] == 0){
         current->time[STARTTIME] = getTODLO();
-    } else {
-        current->time[KERNELTIME] = current->time[KERNELTIME] + (getTODLO() - last_kernel_switch);
     }
     // Switch da kernel mode a user mode
 

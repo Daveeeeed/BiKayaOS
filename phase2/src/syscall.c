@@ -51,16 +51,17 @@ void sysHandler(){
             specialHandler(SYSBK_TYPE);
             break;
     }
+    if (current != NULL) current->time[KERNELTIME] = current->time[KERNELTIME] + (getTODLO() - last_kernel_switch);
     scheduler();
     return;
 }
 
 void getCpuTime(unsigned int *user, unsigned int *kernel, unsigned int *wallclock){
+    if (user != NULL) *user = current->time[USERTIME];
+    if (kernel != NULL) *kernel = current->time[KERNELTIME];
     if (wallclock!= NULL) *wallclock = getTODLO() - current->time[STARTTIME];
-    if (user != NULL) user = &(current->time[USERTIME]);
-    if (kernel != NULL) kernel = &(current->time[KERNELTIME]);
 }
-int acc;
+
 void createProcess(state_t *statep, int priority, void **cpid){
     struct pcb_t *proc_blk;
     if((proc_blk = allocPcb()) == NULL || statep == NULL){
@@ -68,7 +69,6 @@ void createProcess(state_t *statep, int priority, void **cpid){
         if (current != NULL) current->p_s.RET_VAL = -1;
         return;
     }
-    acc = proc_blk;
     copyState(statep, &proc_blk->p_s);
     // Inserisce l'indirizzo del processo nella mappa dei processi attivi
     proc_map[0]++;
@@ -114,14 +114,12 @@ void recursiveTermination(pcb_t* root){
 
 void terminateProcess(void *pid){
     if (pid == NULL){
-        breakpoint2();
         if (current != NULL){
             pid = current;
             current = NULL;
         } else return;
     }
-    if (proc_map[((pcb_t*)pid)->pid] == pid){
-        breakpoint3();
+    if (proc_map[((pcb_t*)pid)->pid] == (unsigned)pid){
         recursiveTermination(pid);
         if (current != NULL) current->p_s.RET_VAL = 0;
     } else {
@@ -142,6 +140,7 @@ void passeren(int *semaddr){
     (*semaddr)--;
     if(*semaddr < 0){
         insertBlocked(semaddr, current);
+        current->time[KERNELTIME] = current->time[KERNELTIME] + (getTODLO() - last_kernel_switch);
         current = NULL;
     }
     return;
