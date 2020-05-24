@@ -4,16 +4,20 @@ default:
 
 umps:
 	@mkdir -p build
-	@$(MAKE) -f uarmmake clean
-	@$(MAKE) -f umpsmake
+	@mkdir -p build/umps
+	@$(MAKE) -f umpsmake PACK=mipsel-linux-gnu
+
+umps1:
+	@mkdir -p build
+	@mkdir -p build/umps
+	@$(MAKE) -f umpsmake PACK=mipsisa64r6el-linux-gnuabi64
 
 uarm:
 	@mkdir -p build
-	@$(MAKE) -f umpsmake clean
+	@mkdir -p build/uarm
 	@$(MAKE) -f uarmmake
 
 clean:
-	@rm -f build/*
-	@rmdir build
+	@rm -r -f build
 
 .PHONY: default umps uarm clean

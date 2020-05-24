@@ -146,13 +146,7 @@ void copyState(state_t* src, state_t* dest);
 // Ritorna l'indice dell'array dev_response e dev_sem corrispondente al device all'indirizzo reg
 unsigned deviceIndex(unsigned *reg, int subdevice);
 
-// Funzioni di debug
+// Funzione di debug
 void breakpoint();
-void breakpoint1();
-void breakpoint2();
-void breakpoint3();
-void breakpoint4();
-void breakpoint5();
-void breakpoint6();
 
 #endif

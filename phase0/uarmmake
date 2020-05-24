@@ -6,11 +6,11 @@ LD = $(XT_PRG_PREFIX)ld
 
 # Paths
 INCLUDE_DIR = ./scr ./src/uarm ./include ./include/uarm
-OUTPUT_DIR = ./build
+OUTPUT_DIR = ./build/uarm
 VPATH = $(INCLUDE_DIR)
 
 # Files
-SRCS := $(wildcard src/*.c) crtso.s libuarm.s
+SRCS := $(wildcard src/*.c) crtso.s libuarm.s libdiv.s
 OBJS_TMP := $(SRCS:.s=.o)
 OBJS := $(OBJS_TMP:.c=.o)
 

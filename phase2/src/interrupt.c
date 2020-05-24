@@ -59,6 +59,16 @@ void dtpHandler(int type){
     if ((device_nr = getDeviceNr(*interrupt_bitmap)) < 0) PANIC();
     else dev = (dtpreg_t*) DEV_REG_ADDR(type, device_nr);
     i = DEV_PER_INT * (type - 3) + device_nr;
+    status = dev->status;
+    dev->command = CMD_ACK;
+    if(dev_sem[i] < 0){
+        pcb_t *free = headBlocked(&dev_sem[i]);
+        verhogen(&dev_sem[i]);
+        if (free != NULL) free->p_s.RET_VAL = status;
+        dev_response[i] = 0;
+    } else {
+        dev_response[i] = status;
+    }
 }
 
 void terminalHandler(){

@@ -113,22 +113,3 @@ unsigned deviceIndex(unsigned *reg, int subdevice){
     dev_pos = address/10;
     return (dev_line - 3) * 8 + dev_pos;
 }
-
-void breakpoint1(){
-
-}
-void breakpoint2(){
-    
-}
-void breakpoint3(){
-    
-}
-void breakpoint4(){
-    
-}
-void breakpoint5(){
-    
-}
-void breakpoint6(){
-    
-}

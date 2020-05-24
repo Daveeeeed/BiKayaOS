@@ -5,7 +5,7 @@ LD = mipsel-linux-gnu-ld
 
 # Paths
 INCLUDE_DIR = ./scr ./src/umps ./include ./include/umps
-OUTPUT_DIR = ./build
+OUTPUT_DIR = ./build/umps
 VPATH = $(INCLUDE_DIR)
 
 # Files

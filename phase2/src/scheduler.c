@@ -1,6 +1,15 @@
 #include "scheduler.h"
 #include "utils.h"
 
+int checkFirst(){
+    if (!emptyProcQ(getQueue())){
+        if (headProcQ(getQueue())->original_priority > current->priority) return 1;
+        else return 0;
+    } else {
+        return 0;
+    }
+}
+
 void scheduler(){
     // Se ci sono processi ready e il processo corrente è NULL
     if (current == NULL && !emptyProcQ(getQueue())){
@@ -10,7 +19,7 @@ void scheduler(){
     } else if (current == NULL && emptyProcQ(getQueue())){
         PANIC();
     // Se deve essere eseguito un context switch
-    } else if (timer_on == 0){
+    } else if (timer_on == 0 || checkFirst()){
         unsigned first_priority = 0;
         pcb_t *tmp = NULL;
         struct list_head* iterator;

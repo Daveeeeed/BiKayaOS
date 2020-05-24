@@ -65,7 +65,6 @@ void getCpuTime(unsigned int *user, unsigned int *kernel, unsigned int *wallcloc
 void createProcess(state_t *statep, int priority, void **cpid){
     struct pcb_t *proc_blk;
     if((proc_blk = allocPcb()) == NULL || statep == NULL){
-        // TODO CHECK
         if (current != NULL) current->p_s.RET_VAL = -1;
         return;
     }
@@ -85,7 +84,6 @@ void createProcess(state_t *statep, int priority, void **cpid){
     // inserisce il processo come figlio del corrente
     insertChild(current, proc_blk);
     if (cpid != NULL) *cpid = proc_blk;
-    // TODO CHECK
     if (current != NULL) current->p_s.RET_VAL = 0;
     return;
 }
@@ -159,7 +157,6 @@ void waitIO(unsigned int command, unsigned int *reg, int subdevice){
         passeren(&dev_sem[i]);
     // se c'è una risposta pronta per essere trasmessa la ritorno
     } else {
-        // TODO CHECK
         if (current != NULL) current->p_s.RET_VAL = dev_response[i];
         dev_response[i] = 0;
     }
@@ -176,11 +173,9 @@ void specPassup(int type, state_t *old_st, state_t *new_st){
         current->proc_area[i + 1] = old_st;
     } else {
         terminateProcess(NULL);
-        // TODO CHECK
         if (current != NULL) current->p_s.RET_VAL = -1;
         return;
     }
-    // TODO CHECK
     if (current != NULL) current->p_s.RET_VAL = 0;
     return;
 }

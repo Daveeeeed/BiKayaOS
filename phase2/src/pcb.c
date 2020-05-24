@@ -27,9 +27,7 @@ pcb_t *allocPcb(void){
     pcb_t *deleted;
     deleted = container_of(pcb_free.next, pcb_t, p_next);
     list_del(pcb_free.next);
-    deleted->p_parent = NULL;
-    deleted->p_semkey = NULL;
-    deleted->original_priority = 0;
+    *deleted = (pcb_t){0};
     return deleted;
 }
 
