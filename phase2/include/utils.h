@@ -5,6 +5,7 @@
 #include "pcb.h"
 #include "asl.h"
 #include "const_bikaya.h"
+#include "stddef.h"
 
 // Definizoni mancanti
 #define TOD_LO     *((unsigned int *)BUS_REG_TOD_LO)
@@ -148,5 +149,7 @@ unsigned deviceIndex(unsigned *reg, int subdevice);
 
 // Funzione di debug
 void breakpoint();
+
+void *memset(void *s, int c, size_t n);
 
 #endif

@@ -113,3 +113,10 @@ unsigned deviceIndex(unsigned *reg, int subdevice){
     dev_pos = address/10;
     return (dev_line - 3) * 8 + dev_pos;
 }
+
+void *memset(void *s, int c, size_t n){
+    unsigned char* p = s;
+    while(n--)
+        *p++ = (unsigned char)c;
+    return s;
+}
