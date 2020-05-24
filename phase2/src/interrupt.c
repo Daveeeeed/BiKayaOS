@@ -50,7 +50,6 @@ void intHandler(){
     scheduler();
 }
 
-// TODO: da scrivere per uARM e uMPS
 void dtpHandler(int type){
     int i, status, device_nr;
     dtpreg_t* dev;

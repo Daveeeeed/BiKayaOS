@@ -16,9 +16,11 @@ void scheduler(){
         current = removeProcQ(getQueue());
         timer_on = 1;
         setTIMER(TIME_SLICE);
+    // Se il processo corrente è NULL e nessun processo è in attesa d'esecuzione
     } else if (current == NULL && emptyProcQ(getQueue())){
         PANIC();
-    // Se deve essere eseguito un context switch
+    // Se deve essere eseguito un context switch o
+    // se è stato liberato un processo con priorità maggiore del corrente
     } else if (timer_on == 0 || checkFirst()){
         unsigned first_priority = 0;
         pcb_t *tmp = NULL;
@@ -41,7 +43,6 @@ void scheduler(){
         current->time[STARTTIME] = getTODLO();
     }
     // Switch da kernel mode a user mode
-
     last_user_switch = getTODLO();
     LDST(&current->p_s);
 }

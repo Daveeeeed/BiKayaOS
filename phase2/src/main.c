@@ -4,7 +4,7 @@
 #include "syscall.h"
 #include "exception.h"
 
-// Funzioni esterne di test collocate in p1.5test_bikaya_v0.c
+// Funzioni esterne di test collocate in p2test_bikaya.c
 extern void test();
 
 int main(){

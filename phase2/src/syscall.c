@@ -148,7 +148,7 @@ void waitIO(unsigned int command, unsigned int *reg, int subdevice){
     unsigned *cmd_reg;
     // ottengo l'indice del device
     int i = deviceIndex(reg, subdevice);
-    // ottengo il registro del comando del device
+    // ottengo il registro comando del device
     if (reg >= FIRST_ADDR_TERMINAL) cmd_reg = reg + 3 - 2 * subdevice;
     else cmd_reg = reg + 1;
     // attivo il comando

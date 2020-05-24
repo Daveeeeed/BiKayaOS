@@ -1,16 +1,16 @@
 #ifndef _INTERRUPT_H
 #define _INTERRUPT_H
 
-// Data una bitmap restituisce l'indice del device che ha sollevato un interrupt
+// Data una bitmap restituisce l'indice del device (range 0-7) che ha sollevato un interrupt
 int getDeviceNr(unsigned bitmap);
 
-// Gestore di interrupt
+// Gestore iniziale degli interrupt
 void intHandler();
 
-// DTNP handler
+// Gestore specifico degli interrupt sollevati da devices (escluso terminale)
 void dtpHandler(int type);
 
-// Terminal handler
+// Gestore specifico degli interrupt sollevati da terminale
 void terminalHandler();
 
 #endif

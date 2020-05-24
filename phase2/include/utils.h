@@ -123,7 +123,7 @@ int dev_sem[MAXDEV];
 // Status in attesa di essere cominicato alla WAITIO
 int dev_response[MAXDEV];
 
-// Mappa degli indirizzi dei processi attivi
+// Mappa degli indirizzi dei processi attivi (e del numero di quest'ultimi)
 unsigned proc_map[MAXPROC+1];
 
 // Processo attivo
@@ -150,6 +150,7 @@ unsigned deviceIndex(unsigned *reg, int subdevice);
 // Funzione di debug
 void breakpoint();
 
+// Funzione richiesta dal comando a riga 30 di pcb.c (pcb_t initalization)
 void *memset(void *s, int c, size_t n);
 
 #endif
