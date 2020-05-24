@@ -24,6 +24,7 @@ int main(){
     for (int i = 0; i < MAXDEV; i++){
         dev_response[i] = 0;
         dev_sem[i] = 0;
+        dev_command_sem[i]= 0;
     }
 
     for (int i = 0; i <= MAXPROC; i++){

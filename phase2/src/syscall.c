@@ -143,22 +143,35 @@ void passeren(int *semaddr){
     }
     return;
 }
+unsigned *stat_reg;
 
 void waitIO(unsigned int command, unsigned int *reg, int subdevice){
-    // ottengo il registro del comando del device
-    unsigned *cmd_reg = reg + 3 - 2 * subdevice;
-    // attivo il comando
-    *cmd_reg = command;
+    unsigned *cmd_reg;
     // ottengo l'indice del device
     int i = deviceIndex(reg, subdevice);
-    // se non c'è nessuna risposta in attesa di essere trasmessa
-    // blocco il processo sul semaforo del device
-    if (dev_response[i] == 0){
-        passeren(&dev_sem[i]);
-    // se c'è una risposta pronta per essere trasmessa la ritorno
+    // ottengo il registro del comando del device
+    if (reg >= FIRST_ADDR_TERMINAL){
+        cmd_reg = reg + 3 - 2 * subdevice;
+        stat_reg = reg + 2 - 2 * subdevice;
     } else {
-        if (current != NULL) current->p_s.RET_VAL = dev_response[i];
-        dev_response[i] = 0;
+        cmd_reg = reg + 1;
+        stat_reg = reg;
+    }
+    if (*stat_reg == ST_READY){
+        // attivo il comando
+        *cmd_reg = command;
+        // se non c'è nessuna risposta in attesa di essere trasmessa
+        // blocco il processo sul semaforo del device
+        if (dev_response[i] == 0){
+            passeren(&dev_sem[i]);
+        // se c'è una risposta pronta per essere trasmessa la ritorno
+        } else {
+            if (current != NULL) current->p_s.RET_VAL = dev_response[i];
+            dev_response[i] = 0;
+        }
+    } else {
+        current->command = command;
+        passeren(&dev_command_sem[i]);
     }
     return;
 }
