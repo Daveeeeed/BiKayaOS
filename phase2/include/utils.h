@@ -120,9 +120,6 @@ unsigned last_user_switch,last_kernel_switch;
 // Semafori dei processi bloccati sui devices
 int dev_sem[MAXDEV];
 
-// Semafori dei comandi in attesa sui devices
-int dev_command_sem[MAXDEV];
-
 // Status in attesa di essere cominicato alla WAITIO
 int dev_response[MAXDEV];
 

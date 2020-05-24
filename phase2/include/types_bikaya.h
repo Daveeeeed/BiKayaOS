@@ -39,9 +39,6 @@ typedef struct pcb_t {
 
     /* process id number */
     int pid;
-
-    /* queued command */
-    int command;
     
     /* utility times */
     // #0 start_time,tempo della prima attivazione

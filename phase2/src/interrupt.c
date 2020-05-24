@@ -61,12 +61,6 @@ void dtpHandler(int type){
     i = DEV_PER_INT * (type - 3) + device_nr;
     status = dev->status;
     dev->command = CMD_ACK;
-    if (dev_command_sem[i] < 0){
-        pcb_t *executed = headBlocked(&dev_command_sem[i]);
-        verhogen(&dev_command_sem[i]);
-        waitIO(executed->command, dev, 0);
-        executed->command = 0;
-    }
     if(dev_sem[i] < 0){
         pcb_t *free = headBlocked(&dev_sem[i]);
         verhogen(&dev_sem[i]);
@@ -81,7 +75,6 @@ void terminalHandler(){
     int i, status, device_nr;
     termreg_t* term;
     memaddr* interrupt_bitmap = (memaddr*) CDEV_BITMAP_ADDR(INT_TERMINAL);
-    int subdevice;
 
     if ((device_nr = getDeviceNr(*interrupt_bitmap)) < 0) PANIC();
     else term = (termreg_t*) DEV_REG_ADDR(INT_TERMINAL, device_nr);
@@ -90,19 +83,11 @@ void terminalHandler(){
         i = DEV_PER_INT * (INT_TERMINAL - 3) + device_nr;
         status = term->recv_status;
         term->recv_command = CMD_ACK;
-        subdevice = 1;
     }
     else if ((term->transm_status & TERM_STATUS_MASK) == ST_TRANS_RECV){
         i = DEV_PER_INT * (INT_TERMINAL - 3 + 1) + device_nr;
         status = term->transm_status;
         term->transm_command = CMD_ACK;
-        subdevice = 0;
-    }
-    if (dev_command_sem[i] < 0){
-        pcb_t *executed = headBlocked(&dev_command_sem[i]);
-        verhogen(&dev_command_sem[i]);
-        waitIO(executed->command, term, subdevice);
-        executed->command = 0;
     }
     if(dev_sem[i] < 0){
         pcb_t *free = headBlocked(&dev_sem[i]);
